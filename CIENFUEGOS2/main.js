@@ -1,4 +1,4 @@
-const endpointURL = 'http://localhost:8000/api/products';
+const endpointURL = 'https://ecoomerce-api-v7wq.onrender.com/api/products';
 
 function cargarProductosDesdeServidor() {
     fetch(endpointURL)
