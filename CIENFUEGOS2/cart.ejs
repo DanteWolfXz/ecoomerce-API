@@ -1,0 +1,167 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIENFUEGOS</title>
+   
+    <script src="https://kit.fontawesome.com/4340dc4f73.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="fontello.css">
+    <script src="https://sdk.mercadopago.com/js/v2">
+    </script>
+</head>
+
+<a href="https://api.whatsapp.com/send?phone=541150500886"class="btn-wsp" target="_blank">
+    <i class="fa fa-whatsapp"></i>
+</a>
+
+
+<body>
+
+    <section id="header">
+        <a href="#"><img src="img/CIENFUEGOS/logo-gif (2).gif" class="logo" alt=""></a>
+
+        <div>
+            <ul id="navbar">
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/shop">Comprar</a></li>
+                <li><a href="/blog">Blog</a></li>
+                <li><a href="/about">Nosotros</a></li>
+                <li id="LoginLink"><a href="/Acceder">Acceder</a></li>
+                <li id="lg-bag"><a class="active" href="/cart"><i class="fas fa-shopping-cart"></i></a></li>
+                <a href="#" id="close"><i class="fas fa-times"></i></a>
+            </ul>
+        </div>
+        <div id="mobile">
+            <a href="/cart"><i class="fas fa-shopping-cart"></i></a>
+            <i id="bar" class="fas fa-outdent"></i>
+        </div>
+    </section>
+
+    <section id="page-header">
+        <h2>#ComproDesdeCasa</h2>
+        <p>No te lo pierdas!</p>
+    </section>
+
+    <section id="cart" class="section-p1">
+        <table width="100%">
+            <thead>
+                <tr>
+                    <td>Quitar</td>
+                    <td>Imagen</td>
+                    <td>Producto</td>
+                    <td>Precio</td>
+                    <td>Cantidad</td>
+                    <td>Subtotal</td>
+                </tr>
+            </thead>
+            <tbody id="cart-table-body"></tbody>
+        </table>
+    </section>
+
+    <section id="cart-add" class="section-p1">
+        <div id="coupon">
+            <h3>Aplicar Cupon</h3>
+            <div>
+                <input type="text" placeholder="Ingresa Tu Cupon">
+                <button class="normal">Aplicar</button>
+            </div>
+        </div>
+
+        <div id="subtotal">
+            <h3>Total del carrito</h3>
+            <table>
+                <tr>
+                    <td>Subtotal De Carrito</td>
+                    <td id="subtotal-amount"></td>
+                </tr>
+                <tr>
+                    <td>Delivery</td>
+                    <td>No Disponible</td>
+                </tr>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td id="total-amount"><strong></strong></td>
+                </tr>
+            </table>
+            <button class="normal" id="continuar-pago">Seguir con el pago</button>
+            <div id="mercadopagoButton"></div>
+        </div>
+    </section>
+
+    <footer class="section-p1">
+        <div class="col">
+            <img class="logo" src="img/CIENFUEGOS/logo-gif (2).gif" alt="">
+            <h4>Contacto</h4>
+            <p><strong>Dirección:</strong>Hipólito Yrigoyen 2270. José C. Paz</p>
+            <p><strong>Telefono:</strong>02320-425270</p>
+            <p><strong>Celular:</strong>11-5050-0886</p>
+            </div>
+            <div class="follow">
+            <h4>Seguinos!</h4>
+            <div class="icon">
+                <a href="https://www.facebook.com/Cienfuegosjcpaz" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/cien.fuegosjosecpaz/" target="_blank"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div class="col">
+            <h4>Nosotros</h4>
+            <a href="about.html">Quienes Somos</a>
+            <a href="https://nieveartificialnashville.com.ar/" target="_blank">Nieve Artificial</a>
+            <a href="https://www.instagram.com/nieveartificialnashville" target="_blank">Instagram Nashville</a>
+        </div>
+
+        <div class="col">
+            <h4>Mi Cuenta</h4>
+            <a href="about.html">Registrarme</a>
+            <a href="#">Ver carrito</a>
+            <a href="#">Lista de Deseados</a>
+            <a href="#">Seguir mi orden</a>
+            <a href="#">Ayuda</a>
+        </div>
+
+        <div class="col install">
+            <h4>Nieve Artificial Nashville</h4>
+            <div class="row">
+                <img src="img/CIENFUEGOS/narigon-nashville2.png" alt="">
+        </div>
+
+        <div id="copyright">
+            <a href=""><p>Pagina hecha por Tomas Martinez</p></a>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+
+    <script src="js/src/jquery.mkinfinite.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            $('#hero').mkinfinite({
+                maxZoom: 1.6,
+                AnimationTime: 5000,
+                imagesRatio: (1920 / 900),
+                isFixedBG: true,
+                zoomIn: true,
+                imagesList: new Array(
+                    'img/CIENFUEGOS/nieve2.jpg',
+
+                    'img/CIENFUEGOS/nieve1.jpg',
+
+                    'img/CIENFUEGOS/fireworks-6-usagif.gif'
+                )
+            })
+        })
+    </script>
+
+    <script src="Products.js"></script>
+    <script src="cart.js"></script>
+    <script src="js/userloged.js"></script>
+    <script type="module" src="js/Checkout.js"></script>
+    
+
+</body>
+<script src="script.js"></script>
+
+</html>
