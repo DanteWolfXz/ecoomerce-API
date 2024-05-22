@@ -39,11 +39,13 @@ document.getElementById("continuar-pago").addEventListener("click", async () => 
 
         // Crear la orden de pago con los datos de todos los productos del carrito
         const orderData = {
-            items: items,
+            title: items[0].nombre,
+            quantity: items[0].cantidad,
+            price: items[0].precio,
         };
 
-        // Depurar: Imprimir los datos que se enviarán al backend
-        console.log("Datos enviados al backend:", orderData);
+        // Depurar: Imprimir la estructura del objeto que se enviará al backend
+        console.log("Estructura del objeto enviado al backend:", orderData);
 
         // Enviar la orden de pago al backend utilizando la clave de idempotencia generada
         const response = await fetch('http://localhost:8000/create_preference', {
@@ -65,6 +67,7 @@ document.getElementById("continuar-pago").addEventListener("click", async () => 
         alert("Error al procesar el pago: " + error.message);
     }
 });
+
 
 
 const createCheckoutButton = (preferenceId) => {
