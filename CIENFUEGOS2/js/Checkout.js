@@ -20,7 +20,6 @@ document.getElementById("continuar-pago").addEventListener("click", async () => 
     try {
         const idempotencyKey = generateIdempotencyKey(); // Genera una nueva clave de idempotencia
 
-        
         const carritoItems = JSON.parse(localStorage.getItem('carrito')) || [];
         
         if (carritoItems.length === 0) {
@@ -43,6 +42,9 @@ document.getElementById("continuar-pago").addEventListener("click", async () => 
             items: items,
         };
 
+        // Depurar: Imprimir los datos que se enviarán al backend
+        console.log("Datos enviados al backend:", orderData);
+
         // Enviar la orden de pago al backend utilizando la clave de idempotencia generada
         const response = await fetch('http://localhost:8000/create_preference', {
             method: 'POST',
@@ -63,6 +65,7 @@ document.getElementById("continuar-pago").addEventListener("click", async () => 
         alert("Error al procesar el pago: " + error.message);
     }
 });
+
 
 const createCheckoutButton = (preferenceId) => {
     const bricksBuilder = mp.bricks();
