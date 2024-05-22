@@ -48,7 +48,7 @@ document.getElementById("continuar-pago").addEventListener("click", async () => 
         console.log("Estructura del objeto enviado al backend:", orderData);
 
         // Enviar la orden de pago al backend utilizando la clave de idempotencia generada
-        const response = await fetch('http://localhost:8000/create_preference', {
+        const response = await fetch('https://ecoomerce-api-v7wq.onrender.com/create_preference', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
