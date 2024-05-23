@@ -95,7 +95,6 @@
 
   const client = new MercadoPagoConfig({ accessToken: 'TEST-2227087115833139-050214-7d52f2a73126e6c23299d31e4ff7c366-1796258286' });
   
-  const preference = new Preference(client);
 
 
   app.post("/create_preference", async (req, res) => {
