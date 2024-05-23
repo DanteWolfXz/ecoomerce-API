@@ -94,6 +94,9 @@
 
 
   const client = new MercadoPagoConfig({ accessToken: 'TEST-2227087115833139-050214-7d52f2a73126e6c23299d31e4ff7c366-1796258286' });
+  
+  const preference = new Preference(client);
+
 
   app.post("/create_preference", async (req, res) => {
     try {
@@ -106,7 +109,6 @@
             quantity: req.body.items[0].cantidad,
         };
         
-
         const body = {
             items: [{
                 title: orderData.title,
@@ -120,7 +122,7 @@
                 pending: "http://www.google.com",
             },
             auto_return: "approved",
-            notification_url: "https://localhost:5000/webhook", //cambiar luego
+            notification_url: "https://ecoomerce-api-v7wq.onrender.com//webhook", //cambiar luego
         };
 
         const preference = new Preference(client);
