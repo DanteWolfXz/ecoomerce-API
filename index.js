@@ -34,7 +34,7 @@
 
 
   const corsOptions = {
-    origin: 'http://localhost:8000/',
+    origin: 'https://ecoomerce-api-v7wq.onrender.com/',
     optionsSuccessStatus: 200,
   };
 
@@ -107,24 +107,7 @@
       if (!items || items.length === 0) {
         throw new Error('No hay productos en la solicitud');
       }
-
-      const { nombre, cantidad, precio, id } = items[0];
-
-      if (!nombre || !cantidad || !precio || !id) {
-        const missingFields = [];
-        if (!nombre) missingFields.push('nombre');
-        if (!cantidad) missingFields.push('cantidad');
-        if (!precio) missingFields.push('precio');
-        if (!id) missingFields.push('id');
-
-        const errorMessage = `Faltan los siguientes campos: ${missingFields.join(', ')}`;
-        throw new Error(errorMessage);
-      }
-
-      if (isNaN(cantidad) || isNaN(precio)) {
-        throw new Error("Cantidad y precio deben ser valores numéricos válidos");
-      }
-
+      
       const orderData = {
         items: items.map(item => ({
           id: item.id,
