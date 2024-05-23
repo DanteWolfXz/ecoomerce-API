@@ -122,7 +122,7 @@
                 pending: "http://www.google.com",
             },
             auto_return: "approved",
-            notification_url: "https://ecoomerce-api-v7wq.onrender.com//webhook", //cambiar luego
+            notification_url: "https://ecoomerce-api-v7wq.onrender.com/webhook", //cambiar luego
         };
 
         const preference = new Preference(client);
