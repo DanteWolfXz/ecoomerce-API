@@ -97,43 +97,46 @@
 
   app.post("/create_preference", async (req, res) => {
     try {
-      const idempotencyKey = req.headers["x-idempotency-key"];
-      console.log("Idempotency Key:", idempotencyKey);
+        const idempotencyKey = req.headers['x-idempotency-key'];
+        console.log("Idempotency Key:", idempotencyKey);
 
-      const { items } = req.body;
+        const orderData = {
+            title: req.body.items[0].nombre,
+            price: req.body.items[0].precio,
+            quantity: req.body.items[0].cantidad,
+        };
+        
 
-      console.log("Datos recibidos en el backend:", req.body);
+        const body = {
+            items: [{
+                title: orderData.title,
+                unit_price: Number(orderData.price),
+                quantity: Number(orderData.quantity),
+                currency_id: "ARS",
+            }],
+            back_urls: {
+                success: "http://www.google.com",
+                failure: "http://www.google.com",
+                pending: "http://www.google.com",
+            },
+            auto_return: "approved",
+            notification_url: "https://localhost:5000/webhook", //cambiar luego
+        };
 
-      if (!items || items.length === 0) {
-        throw new Error('No hay productos en la solicitud');
-      }
-      
-      const orderData = {
-        items: items.map(item => ({
-          id: item.id,
-          title: item.nombre,
-          quantity: item.cantidad,
-          unit_price: item.precio,
-          currency_id: "ARS"
-        })),
-        back_urls: {
-          success: "http://www.google.com",
-          failure: "http://www.google.com",
-          pending: "http://www.google.com"
-        },
-        auto_return: "approved",
-        notification_url: "https://ecoomerce-api-v7wq.onrender.com/webhook", //cambiar luego
-      };
-
-      const preference = new Preference(client);
-      const result = await preference.create(orderData, idempotencyKey);
-
-      res.json(result);
+        const preference = new Preference(client);
+        const result = await preference.create({ body, idempotencyKey });
+        console.log("Preferencia creada:", result);
+        
+        res.json({
+            id: result.id,
+        });
     } catch (error) {
-      console.error("Error al crear la preferencia:", error.message);
-      res.status(500).json({ error: error.message });
+        console.error("Error:", error);
+        res.status(500).json({
+            error: "Error al crear la preferencia :(",
+        });
     }
-  });
+});
 
 
   app.listen(process.env.PORT || 8000, () => {
