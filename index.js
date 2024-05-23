@@ -101,7 +101,6 @@
   app.post("/create_preference", async (req, res) => {
     try {
         const idempotencyKey = uuidv4();
-        
 
         const orderData = {
             title: req.body.items[0].nombre,
