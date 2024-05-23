@@ -101,7 +101,6 @@
   app.post("/create_preference", async (req, res) => {
     try {
         const idempotencyKey = req.headers['x-idempotency-key'];
-        console.log("Idempotency Key:", idempotencyKey);
 
         const orderData = {
             title: req.body.items[0].nombre,
