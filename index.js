@@ -13,6 +13,7 @@
   import cors from 'cors';
   import { MercadoPagoConfig, Preference } from 'mercadopago';
   import bodyParser from 'body-parser';
+  import{ v4 as uuidv4 } from 'uuid';
 
   dotenv.config();
 
@@ -99,7 +100,8 @@
 
   app.post("/create_preference", async (req, res) => {
     try {
-        const idempotencyKey = req.headers['x-idempotency-key'];
+        const idempotencyKey = uuidv4();
+        
 
         const orderData = {
             title: req.body.items[0].nombre,
