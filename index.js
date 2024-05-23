@@ -14,9 +14,11 @@
   import { MercadoPagoConfig, Preference } from 'mercadopago';
   import bodyParser from 'body-parser';
   import { v4 as uuidv4 } from 'uuid';
+  import debug from 'debug';
 
   dotenv.config();
 
+  const appDebug = debug('app');
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const port = process.env.PORT || 8000;
@@ -97,10 +99,12 @@
   const client = new MercadoPagoConfig({ accessToken: 'TEST-2227087115833139-050214-7d52f2a73126e6c23299d31e4ff7c366-1796258286' });
   
 
+  appDebug('Iniciando la aplicación...');
 
   app.post("/create_preference", async (req, res) => {
     try {
         const idempotencyKey = uuidv4();
+        appDebug('Generando idempotencyKey:', idempotencyKey);
 
         const orderData = {
             title: req.body.items[0].nombre,
