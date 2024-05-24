@@ -1243,9 +1243,9 @@
 }
 
 .heading h1{
-    font-size: 50px;
+    font-size: 50px !important;
     color: #000;
-    margin-bottom: 25px;
+    margin-bottom: 25px !important;
     position: relative;
 }
 .heading h1::after{
@@ -1258,13 +1258,13 @@
     background-color: #4caf50;
 }
 .heading p{
-    font-size: 10px;
-    color: #666;
-    margin: 35px;
+    font-size: 10px !important;
+    color: #666 !important;
+    margin: 35px !important;
 }
 
 .container{
-    width: 90%;
+    width: 90%!;
     margin: 0 auto;
     padding: 10px 20px;
 }
