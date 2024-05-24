@@ -65,6 +65,10 @@
     res.render('cart');
   });
 
+  app.get('/about', (req, res) => {
+    res.render('about');
+  });
+
   app.get('/registro', (req, res) => {
     res.render('registro');
   });
