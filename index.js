@@ -104,14 +104,6 @@
   app.use(cors());
   app.use(express.json());
   
-  app.get("/", (req,res) => {
-      res.send('backend server is running!');
-  });
-  
-  
-  app.get('/', (req, res) => {
-      res.render('index.html');
-    });
   
 
     app.post("/create_preference", async (req, res) => {

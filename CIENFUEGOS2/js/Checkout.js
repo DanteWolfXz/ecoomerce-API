@@ -20,7 +20,7 @@ console.log(idempotencyKey);
 document.getElementById('continuar-pago').addEventListener('click', async () => {
     try{
         const orderData = {
-            title: document.querySelector(".name").innerText,
+            title: producto1,
             quantity: 1,
             price: 100,
         };
