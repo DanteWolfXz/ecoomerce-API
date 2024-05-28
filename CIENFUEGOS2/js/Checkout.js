@@ -17,7 +17,7 @@ const idempotencyKey = generateIdempotencyKey();
 console.log(idempotencyKey);
 
 
-document.getElementById('checkout-btn').addEventListener('click', async () => {
+document.getElementById('continuar-pago').addEventListener('click', async () => {
     try {
         // Obtener los elementos del carrito del localStorage
         const cartItems = JSON.parse(localStorage.getItem("carrito"));
