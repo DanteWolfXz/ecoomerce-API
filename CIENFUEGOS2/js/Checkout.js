@@ -18,45 +18,28 @@ console.log(idempotencyKey);
 
 
 document.getElementById('continuar-pago').addEventListener('click', async () => {
-    try {
-        const cartItems = JSON.parse(localStorage.getItem("carrito"));
+    try{
+        const orderData = {
+            title: document.querySelector(".name").innerText,
+            quantity: 1,
+            price: 100,
+        };
 
-        if (!cartItems || cartItems.length === 0) {
-            alert("El carrito está vacío");
-            return;
-        }
-        const orderDataArray = cartItems.map(item => ({
-            title: item.nombre,
-            quantity: item.cantidad,
-            price: item.precio,
-        }));
         const response = await fetch("https://server-mu2p.onrender.com/create_preference", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "x-idempotency-key": idempotencyKey,
             },
-            body: JSON.stringify(orderDataArray),
+            body: JSON.stringify(orderData),
         });
 
-        const preferences = await response.json();
-
-        if (Array.isArray(preferences)) {
-            preferences.forEach(preference => {
-                createCheckoutButton(preference.id);
-            });
-        } else {
-            console.error("La respuesta del servidor no es un arreglo:", preferences);
-            alert("Ocurrió un error al procesar la orden.");
-        }
-
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Ocurrió un error al procesar la orden.");
+        const preference = await response.json();
+        createCheckoutButton(preference.id);
+    } catch (error) { 
+        alert("error :(");
     }
 });
-
-
 
 
 const createCheckoutButton = (preferenceId) => {

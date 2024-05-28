@@ -40,7 +40,6 @@
     optionsSuccessStatus: 200,
   };
 
-  app.use(cors(corsOptions));
 
   app.set('views', path.join(__dirname, 'CIENFUEGOS2'));
   app.set('view engine', 'ejs');
@@ -102,9 +101,6 @@
   const client = new MercadoPagoConfig({ accessToken: "APP_USR-6277177060337111-050214-5becb05e5acc25f7070263ae0e1544ac-243071885"});
 
   
-  
-  app.use(express.static(path.join(__dirname, 'client')));
-  
   app.use(cors());
   app.use(express.json());
   
@@ -123,15 +119,20 @@
           const idempotencyKey = req.headers['x-idempotency-key'];
           console.log("Idempotency Key:", idempotencyKey);
   
-          const items = req.body.map(item => ({
-              title: item.title,
-              unit_price: Number(item.price),
-              quantity: Number(item.quantity),
-              currency_id: "ARS",
-          }));
+          const orderData = {
+              title: req.body.title,
+              price: req.body.price,
+              quantity: req.body.quantity,
+          };
+          console.log("Datos recibidos del frontend:", orderData);
   
           const body = {
-              items: items,
+              items: [{
+                  title: orderData.title,
+                  unit_price: Number(orderData.price),
+                  quantity: Number(orderData.quantity),
+                  currency_id: "ARS",
+              }],
               back_urls: {
                   success: "http://www.google.com",
                   failure: "http://www.google.com",
