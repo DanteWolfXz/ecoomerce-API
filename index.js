@@ -101,7 +101,6 @@
 
   const client = new MercadoPagoConfig({ accessToken: "APP_USR-6277177060337111-050214-5becb05e5acc25f7070263ae0e1544ac-243071885"});
 
-  app.set('views', path.join(__dirname, 'client'));
   
   
   app.use(express.static(path.join(__dirname, 'client')));
