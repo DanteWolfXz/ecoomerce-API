@@ -17,25 +17,19 @@ const idempotencyKey = generateIdempotencyKey();
 console.log(idempotencyKey);
 
 
-document.getElementById('continuar-pago').addEventListener('click', async () => {
+document.getElementById('checkout-btn').addEventListener('click', async () => {
     try {
-        // Obtener los elementos del carrito del localStorage
         const cartItems = JSON.parse(localStorage.getItem("carrito"));
 
-        // Verificar si hay elementos en el carrito
         if (!cartItems || cartItems.length === 0) {
             alert("El carrito está vacío");
             return;
         }
-
-        // Crear un arreglo para almacenar los datos de la orden
         const orderDataArray = cartItems.map(item => ({
             title: item.nombre,
             quantity: item.cantidad,
             price: item.precio,
         }));
-
-        // Realizar la solicitud para crear la preferencia de pago para los elementos del carrito
         const response = await fetch("https://server-mu2p.onrender.com/create_preference", {
             method: "POST",
             headers: {
@@ -47,7 +41,6 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
 
         const preferences = await response.json();
 
-        // Crear botones de pago para cada preferencia
         preferences.forEach(preference => {
             createCheckoutButton(preference.id);
         });

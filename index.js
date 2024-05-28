@@ -117,6 +117,7 @@
       res.render('index.html');
     });
   
+
     app.post("/create_preference", async (req, res) => {
       try {
           const idempotencyKey = req.headers['x-idempotency-key'];
@@ -132,9 +133,9 @@
           const body = {
               items: items,
               back_urls: {
-                  success: "https://ecoomerce-api-v7wq.onrender.com/pago-confirmado",
-                  failure: "https://ecoomerce-api-v7wq.onrender.com/pago-denegado",
-                  pending: "https://ecoomerce-api-v7wq.onrender.com/pago-pendiente",
+                  success: "http://www.google.com",
+                  failure: "http://www.google.com",
+                  pending: "http://www.google.com",
               },
               autor_return: "approved",
               notification_url: "https://server-mu2p.onrender.com/webhook", //cambiar luego
@@ -154,8 +155,6 @@
           });
       }
   });
-  
-  
   
   app.post("/webhook", async (req, res) => {
       try {
