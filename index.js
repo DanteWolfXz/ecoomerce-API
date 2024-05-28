@@ -13,7 +13,6 @@
   import cors from 'cors';
   import { MercadoPagoConfig, Preference } from 'mercadopago';
   import bodyParser from 'body-parser';
-  import { v4 as uuidv4 } from 'uuid';
   import debug from 'debug';
 
   dotenv.config();
@@ -100,51 +99,91 @@
   });
 
 
-  const client = new MercadoPagoConfig({ accessToken: 'TEST-2227087115833139-050214-7d52f2a73126e6c23299d31e4ff7c366-1796258286' });
+  const client = new MercadoPagoConfig({ accessToken: "APP_USR-6277177060337111-050214-5becb05e5acc25f7070263ae0e1544ac-243071885"});
+
+  app.set('views', path.join(__dirname, 'client'));
   
-
-  appDebug('Iniciando la aplicación...');
-
-  app.post("/create_preference", async (req, res) => {
-    try {
-        const idempotencyKey = req.headers['x-idempotency-key']; 
-
-        const orderData = {
-            title: req.body.items[0].nombre,
-            price: req.body.items[0].precio,
-            quantity: req.body.items[0].cantidad,
-        };
-        
-        const body = {
-            items: [{
-                title: orderData.title,
-                unit_price: Number(orderData.price),
-                quantity: Number(orderData.quantity),
-                currency_id: "ARS",
-            }],
-            back_urls: {
-                success: "http://www.google.com",
-                failure: "http://www.google.com",
-                pending: "http://www.google.com",
-            },
-            auto_return: "approved",
-            notification_url: "https://ecoomerce-api-v7wq.onrender.com/webhook", //cambiar luego
-        };
-
-        const preference = new Preference(client);
-        const result = await preference.create({ body, idempotencyKey });
-        console.log("Preferencia creada:", result);
-        
-        res.json({
-            id: result.id,
-        });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({
-            error: "Error al crear la preferencia :(",
-        });
-    }
-});
+  
+  app.use(express.static(path.join(__dirname, 'client')));
+  
+  app.use(cors());
+  app.use(express.json());
+  
+  app.get("/", (req,res) => {
+      res.send('backend server is running!');
+  });
+  
+  
+  app.get('/', (req, res) => {
+      res.render('index.html');
+    });
+  
+    app.post("/create_preference", async (req, res) => {
+      try {
+          const idempotencyKey = req.headers['x-idempotency-key'];
+          console.log("Idempotency Key:", idempotencyKey);
+  
+          const items = req.body.map(item => ({
+              title: item.title,
+              unit_price: Number(item.price),
+              quantity: Number(item.quantity),
+              currency_id: "ARS",
+          }));
+  
+          const body = {
+              items: items,
+              back_urls: {
+                  success: "https://ecoomerce-api-v7wq.onrender.com/pago-confirmado",
+                  failure: "https://ecoomerce-api-v7wq.onrender.com/pago-denegado",
+                  pending: "https://ecoomerce-api-v7wq.onrender.com/pago-pendiente",
+              },
+              autor_return: "approved",
+              notification_url: "https://server-mu2p.onrender.com/webhook", //cambiar luego
+          };
+  
+          const preference = new Preference(client);
+          const result = await preference.create({ body, idempotencyKey });
+          console.log("Preferencia creada:", result);
+          
+          res.json({
+              id: result.id,
+          });
+      } catch (error) {
+          console.error("Error:", error);
+          res.status(500).json({
+              error: "Error al crear la preferencia :(",
+          });
+      }
+  });
+  
+  
+  
+  app.post("/webhook", async (req, res) => {
+      try {
+          const paymentId = req.query.id;
+          console.log("ID del pago recibido en el webhook:", paymentId);
+  
+          const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+              method: "GET",
+              headers: {
+                  'Authorization': `Bearer  ${client.accessToken}`
+              }
+          });
+  
+          if (response.ok) {
+              const data = await response.json();
+              console.log("Datos del pago:", data);
+              // Puedes realizar más acciones con los datos del pago aquí si es necesario
+              res.sendStatus(200);
+          } else {
+              console.error("Error al obtener datos del pago:", response.statusText);
+              res.sendStatus(500);
+          }
+      } catch (error) {
+          console.error('Error:', error);
+          res.sendStatus(500);
+      }
+  });
 
 
   app.listen(process.env.PORT || 8000, () => {

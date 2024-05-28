@@ -1,68 +1,82 @@
-const mp = new MercadoPago('TEST-b908db80-ef27-419d-8364-920f40a8326f', {
-    locale: "es-AR",
-    advancedFraudPrevention: true,
+const mp = new MercadoPago('APP_USR-036923c5-0d70-416f-8614-76a248763ff5', {
+    locale: 'es-AR'
 });
-const bricksBuilder = mp.bricks();
-const continuarPagoBtn = document.getElementById("continuar-pago");
 
 const generateIdempotencyKey = () => {
-    return uuidv4(); // Utilizamos una función externa para generar un UUID
+    const length = 20;
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let idempotencyKey = '';
+    for (let i = 0; i < length; i++) {
+        idempotencyKey += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return idempotencyKey;
 };
 
-const createCheckoutButton = (preferenceId) => {
-    const renderComponent = async () => {
-        bricksBuilder.create("wallet", "mercadopagoButton", {
-            initialization: {
-                preferenceId: preferenceId,
-            },
-        });
-    };
+const idempotencyKey = generateIdempotencyKey();
+console.log(idempotencyKey);
 
-    renderComponent();
-};
 
-const processPayment = async () => {
+document.getElementById('checkout-btn').addEventListener('click', async () => {
     try {
-        const idempotencyKey = generateIdempotencyKey();
-        const carritoItems = JSON.parse(localStorage.getItem('carrito')) || [];
-        
-        if (carritoItems.length === 0) {
-            throw new Error('No hay productos en el carrito');
+        // Obtener los elementos del carrito del localStorage
+        const cartItems = JSON.parse(localStorage.getItem("carrito"));
+
+        // Verificar si hay elementos en el carrito
+        if (!cartItems || cartItems.length === 0) {
+            alert("El carrito está vacío");
+            return;
         }
 
-        const items = carritoItems.map(item => ({
-            id: item.id,
-            title: item.nombre,
-            quantity: item.cantidad,
-            unit_price: item.precio,
+        // Crear un arreglo para almacenar los datos de la orden
+        const orderDataArray = cartItems.map(item => ({
+            title: item.title,
+            quantity: item.quantity,
+            price: item.price,
         }));
 
-        console.log("Datos del carrito:", items);
-
-        const orderData = {
-            items: items,
-        };
-
-        console.log("Datos enviados al backend:", orderData);
-
-        const response = await fetch('https://ecoomerce-api-v7wq.onrender.com/create_preference', {
-            method: 'POST',
+        // Realizar la solicitud para crear la preferencia de pago para los elementos del carrito
+        const response = await fetch("https://server-mu2p.onrender.com/create_preference", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'X-Idempotency-Key': idempotencyKey,
+                "Content-Type": "application/json",
+                "x-idempotency-key": idempotencyKey,
             },
-            body: JSON.stringify(orderData),
+            body: JSON.stringify(orderDataArray),
         });
 
-        if (!response.ok) {
-            throw new Error('Error al procesar el pago');
-        }
+        const preferences = await response.json();
 
-        const preference = await response.json();
-        createCheckoutButton(preference.id);
+        // Crear botones de pago para cada preferencia
+        preferences.forEach(preference => {
+            createCheckoutButton(preference.id);
+        });
+
     } catch (error) {
-        alert("Error al procesar el pago: " + error.message);
+        console.error("Error:", error);
+        alert("Ocurrió un error al procesar la orden.");
     }
-};
+});
 
-continuarPagoBtn.addEventListener("click", processPayment);
+
+
+
+const createCheckoutButton = (preferenceId) => {
+    const bricksBuilder = mp.bricks();
+    
+    const renderComponent = async () => {
+        if (window.checkoutButton) window.checkoutButton.unmount();
+        await bricksBuilder.create("wallet", "wallet_container", {
+            initialization: {
+                preferenceId: preferenceId
+            },
+         customization: {
+          texts: {
+           valueProp: 'smart_option',
+          },
+          },
+         });
+    }
+
+    renderComponent(); // Llama a la función para renderizar el botón
+}
