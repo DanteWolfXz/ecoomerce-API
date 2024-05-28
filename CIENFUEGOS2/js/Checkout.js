@@ -30,9 +30,9 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
 
         // Crear un arreglo para almacenar los datos de la orden
         const orderDataArray = cartItems.map(item => ({
-            title: item.title,
-            quantity: item.quantity,
-            price: item.price,
+            title: item.nombre,
+            quantity: item.cantidad,
+            price: item.precio,
         }));
 
         // Realizar la solicitud para crear la preferencia de pago para los elementos del carrito
