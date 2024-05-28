@@ -41,9 +41,14 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
 
         const preferences = await response.json();
 
-        preferences.forEach(preference => {
-            createCheckoutButton(preference.id);
-        });
+        if (Array.isArray(preferences)) {
+            preferences.forEach(preference => {
+                createCheckoutButton(preference.id);
+            });
+        } else {
+            console.error("La respuesta del servidor no es un arreglo:", preferences);
+            alert("Ocurrió un error al procesar la orden.");
+        }
 
     } catch (error) {
         console.error("Error:", error);
