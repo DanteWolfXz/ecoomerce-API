@@ -25,7 +25,7 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
             price: 100,
         };
 
-        const response = await fetch("https://ecoomerce-api-v7wq.onrender.com//create_preference", {
+        const response = await fetch("https://ecoomerce-api-v7wq.onrender.com/create_preference", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
