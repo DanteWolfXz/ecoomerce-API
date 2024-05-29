@@ -18,12 +18,20 @@ console.log(idempotencyKey);
 
 
 document.getElementById('continuar-pago').addEventListener('click', async () => {
-    try{
-        const orderData = {
-            title: "producto1",
-            quantity: 1,
-            price: 100,
-        };
+    try {
+        const orderDataList = [
+            {
+                title: "producto1",
+                quantity: 1,
+                price: 100,
+            },
+            {
+                title: "producto2",
+                quantity: 2,
+                price: 150,
+            },
+            // Agrega más objetos orderData según sea necesario
+        ];
 
         const response = await fetch("https://ecoomerce-api-v7wq.onrender.com/create_preference", {
             method: "POST",
@@ -31,15 +39,16 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
                 "Content-Type": "application/json",
                 "x-idempotency-key": idempotencyKey,
             },
-            body: JSON.stringify(orderData),
+            body: JSON.stringify(orderDataList),
         });
 
         const preference = await response.json();
         createCheckoutButton(preference.id);
-    } catch (error) { 
+    } catch (error) {
         alert("error :(");
     }
 });
+
 
 
 const createCheckoutButton = (preferenceId) => {
