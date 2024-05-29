@@ -106,48 +106,47 @@
   
   
 
-    app.post("/create_preference", async (req, res) => {
-      try {
-          const idempotencyKey = req.headers['x-idempotency-key'];
-          console.log("Idempotency Key:", idempotencyKey);
-  
-          const orderData = {
-              title: req.body.title,
-              price: req.body.price,
-              quantity: req.body.quantity,
-          };
-          console.log("Datos recibidos del frontend:", orderData);
-  
-          const body = {
-              items: [{
-                  title: orderData.title,
-                  unit_price: Number(orderData.price),
-                  quantity: Number(orderData.quantity),
-                  currency_id: "ARS",
-              }],
-              back_urls: {
+  app.post("/create_preference", async (req, res) => {
+    try {
+        const idempotencyKey = req.headers['x-idempotency-key'];
+        console.log("Idempotency Key:", idempotencyKey);
+
+        const orderData = req.body; // Todo el cuerpo de la solicitud contendrá los datos de los productos
+        console.log("Datos recibidos del frontend:", orderData);
+
+        const items = orderData.products.map(product => ({
+            title: product.title,
+            unit_price: Number(product.price),
+            quantity: Number(product.quantity),
+            currency_id: "ARS",
+        }));
+
+        const body = {
+            items: items,
+            back_urls: {
                 success: "https://ecoomerce-api-v7wq.onrender.com/pago-confirmado",
                 failure: "https://ecoomerce-api-v7wq.onrender.com/pago-denegado",
                 pending: "https://ecoomerce-api-v7wq.onrender.com/pago-pendiente",
             },
             autor_return: "approved",
-            notification_url: "https://ecoomerce-api-v7wq.onrender.com/webhook", //cambiar luego
+            notification_url: "https://ecoomerce-api-v7wq.onrender.com/webhook",
         };
-  
-          const preference = new Preference(client);
-          const result = await preference.create({ body, idempotencyKey });
-          console.log("Preferencia creada:", result);
-          
-          res.json({
-              id: result.id,
-          });
-      } catch (error) {
-          console.error("Error:", error);
-          res.status(500).json({
-              error: "Error al crear la preferencia :(",
-          });
-      }
-  });
+
+        const preference = new Preference(client);
+        const result = await preference.create({ body, idempotencyKey });
+        console.log("Preferencia creada:", result);
+
+        res.json({
+            id: result.id,
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({
+            error: "Error al crear la preferencia :(",
+        });
+    }
+});
+
   
   app.post("/webhook", async (req, res) => {
       try {
