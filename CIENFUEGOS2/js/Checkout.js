@@ -26,13 +26,21 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
         productosEnCarrito.forEach((productoEnCarrito, indice) => { // Iterar sobre cada fila del carrito
             const columns = productoEnCarrito.getElementsByTagName('td');
 
-            const orderData = {
-                title: columns[2].textContent, // Obtener el nombre del producto de la tercera columna
-                quantity: parseInt(columns[4].getElementsByTagName('input')[0].value), // Obtener la cantidad del producto del input en la quinta columna
-                price: parseFloat(columns[3].textContent), // Obtener el precio del producto de la cuarta columna
-            };
+            const nombreProducto = columns[2].textContent; // Obtener el nombre del producto de la tercera columna
+            const cantidadInput = columns[4].getElementsByTagName('input')[0]; // Obtener el input de cantidad del producto de la quinta columna
 
-            orderDataList.push(orderData); // Agregar el objeto orderData al array orderDataList
+            // Obtener la cantidad actualizada del producto
+            const cantidad = parseInt(cantidadInput.value);
+
+            if (cantidad > 0) { // Solo agregar el producto si la cantidad es mayor que cero
+                const orderData = {
+                    title: nombreProducto,
+                    quantity: cantidad,
+                    price: parseFloat(columns[3].textContent), // Obtener el precio del producto de la cuarta columna
+                };
+
+                orderDataList.push(orderData); // Agregar el objeto orderData al array orderDataList
+            }
         });
 
         const response = await fetch("https://ecoomerce-api-v7wq.onrender.com/create_preference", {
@@ -50,6 +58,7 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
         alert("error :(");
     }
 });
+
 
 
 
