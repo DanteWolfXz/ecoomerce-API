@@ -111,10 +111,10 @@
         const idempotencyKey = req.headers['x-idempotency-key'];
         console.log("Idempotency Key:", idempotencyKey);
 
-        const orderData = req.body; // Todo el cuerpo de la solicitud contendrá los datos de los productos
+        const orderData = req.body; // Ahora orderData es una lista de productos
         console.log("Datos recibidos del frontend:", orderData);
 
-        const items = orderData.products.map(product => ({
+        const items = orderData.map(product => ({
             title: product.title,
             unit_price: Number(product.price),
             quantity: Number(product.quantity),
