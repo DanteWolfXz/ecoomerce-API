@@ -15,12 +15,12 @@ function mostrarCarrito() {
 
     let subtotal = 0;
 
-    carrito.forEach(producto => {
+    carrito.forEach((producto, indice) => { // Añade el parámetro `indice` aquí
         const row = document.createElement('tr');
         const subtotalProducto = producto.precio * producto.cantidad;
-
+    
         subtotal += subtotalProducto;
-
+    
         row.innerHTML = `
             <td><i class="fas fa-times-circle" onclick="eliminarProducto('${producto.nombre}')"></i></td>
             <td><img src="${producto.imagen}" alt="${producto.nombre}"></td>
@@ -29,6 +29,7 @@ function mostrarCarrito() {
             <td><input type="number" value="${producto.cantidad}" onchange="actualizarSubtotal('${producto.nombre}', this)"></td>
             <td>${subtotalProducto}</td>
         `;
+        row.classList.add(`producto-${indice}`); // Asegúrate de usar `indice` aquí
         carritoList.appendChild(row);
     });
 
