@@ -19,7 +19,7 @@ router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
 });
 
 // CREATE ORDER
-router.post("/", verifyTokenAndAdmin, async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
     try {
         const newOrder = new Order(req.body);
         const savedOrder = await newOrder.save();
