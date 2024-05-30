@@ -69,7 +69,8 @@ const createCheckoutButton = (preferenceId) => {
         if (window.checkoutButton) window.checkoutButton.unmount();
         await bricksBuilder.create("wallet", "wallet_container", {
             initialization: {
-                preferenceId: preferenceId
+                preferenceId: preferenceId,
+                redirection: "modal",
             },
          customization: {
           texts: {
