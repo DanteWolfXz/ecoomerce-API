@@ -70,7 +70,7 @@ const createCheckoutButton = (preferenceId) => {
         await bricksBuilder.create("wallet", "wallet_container", {
             initialization: {
                 preferenceId: preferenceId,
-                redirection: "modal",
+                redirection: "blank",
             },
          customization: {
           texts: {
