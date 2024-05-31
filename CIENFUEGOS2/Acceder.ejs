@@ -144,16 +144,16 @@ document.getElementById("loginButton").addEventListener("click", function() {
         return response.json();
     })
     .then(data => {
-        // Almacena el token de acceso en el localStorage
+        
         localStorage.setItem("accessToken", data.accessToken);
         
         localStorage.setItem("userId", data.userId);
         
-        // Redirige a otra página
+        
         window.location.href = "/shop";
     })
     .catch(error => {
-        // Maneja cualquier error que ocurra durante la solicitud
+        
         console.error(error);
     });
 });
