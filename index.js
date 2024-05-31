@@ -12,7 +12,6 @@
   import path from 'path';
   import cors from 'cors';
   import { MercadoPagoConfig, Preference } from 'mercadopago';
-  import bodyParser from 'body-parser';
   import debug from 'debug';
 
   dotenv.config();
@@ -30,9 +29,8 @@
     });
 
   const app = express();
-
   app.use(cors({}));
-  app.use(bodyParser.json());
+  
 
 
   const corsOptions = {
