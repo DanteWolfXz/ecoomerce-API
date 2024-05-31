@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } from "./verifyToken.mjs";
-import Order from "../models/Order.mjs"; // Asegúrate de especificar la extensión .mjs
+import Order from "../models/Order.mjs";
 
 const router = express.Router();
 

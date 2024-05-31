@@ -30,14 +30,6 @@
 
   const app = express();
   app.use(cors({}));
-  
-
-
-  const corsOptions = {
-    origin: 'https://ecoomerce-api-v7wq.onrender.com/',
-    optionsSuccessStatus: 200,
-  };
-
 
   app.set('views', path.join(__dirname, 'CIENFUEGOS2'));
   app.set('view engine', 'ejs');
@@ -96,13 +88,8 @@
   });
 
 
-  const client = new MercadoPagoConfig({ accessToken: "APP_USR-6277177060337111-050214-5becb05e5acc25f7070263ae0e1544ac-243071885"});
+  const client = new MercadoPagoConfig({ accessToken: process.env.ACCESS_TOKEN });
 
-  
-  app.use(cors());
-  app.use(express.json());
-  
-  
 
   app.post("/create_preference", async (req, res) => {
     try {
@@ -146,39 +133,54 @@
 });
 
   
-  app.post("/webhook", async (req, res) => {
-      try {
-          const paymentId = req.query.id;
-          console.log("ID del pago recibido en el webhook:", paymentId);
-  
-          const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-              method: "GET",
-              headers: {
-                  'Authorization': `Bearer  ${client.accessToken}`
-              }
-          });
-  
-          if (response.ok) {
-              const data = await response.json();
-              console.log("Datos del pago:", data);
-              // Puedes realizar más acciones con los datos del pago aquí si es necesario
-              res.sendStatus(200);
-          } else {
-              console.error("Error al obtener datos del pago:", response.statusText);
-              res.sendStatus(500);
+app.post("/webhook", async (req, res) => {
+  try {
+      const paymentId = req.query.id;
+      console.log("ID del pago recibido en el webhook:", paymentId);
+
+      const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+          method: "GET",
+          headers: {
+              'Authorization': `Bearer  ${client.accessToken}`
           }
-      } catch (error) {
-          console.error('Error:', error);
+      });
+
+      if (response.ok) {
+          const data = await response.json();
+          console.log("Datos del pago:", data);
+
+          // Aquí deberías llamar a la ruta de creación de órdenes en tu aplicación
+          const orderCreationResponse = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${tuTokenDeAutenticación}`
+              },
+              body: JSON.stringify({
+                  // Aquí deberías pasar los datos necesarios para crear la orden
+                  // Puedes usar los datos de la respuesta del pago de MercadoPago
+                  // o cualquier otra información relevante
+              })
+          });
+
+          console.log('Respuesta de creación de orden:', orderCreationResponse);
+          
+          
+          res.sendStatus(200);
+      } else {
+          console.error("Error al obtener datos del pago:", response.statusText);
           res.sendStatus(500);
       }
-  });
+  } catch (error) {
+      console.error('Error:', error);
+      res.sendStatus(500);
+  }
+});
+
 
 
   app.listen(process.env.PORT || 8000, () => {
     console.log('Backend server is running!');
   });
-
-
-
 
   
