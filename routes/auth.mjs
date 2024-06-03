@@ -26,7 +26,8 @@ router.post("/register", async (req, res) => {
         const savedUser = await newUser.save();
         res.redirect(302, '/acceder');
     } catch (err) {
-        res.status(500).json(err);
+        console.error(err); // Registra el error en la consola del servidor
+        res.status(400).json({ error: err.message }); // Devuelve el mensaje de error al frontend
     }
 });
 
