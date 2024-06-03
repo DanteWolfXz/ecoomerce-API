@@ -59,7 +59,8 @@ router.post("/login", async (req, res) => {
         res.status(200).json({ accessToken, userId: user._id });
 
     } catch (err) {
-        res.status(500).json(err);
+        console.error(err); // Registra el error en la consola del servidor
+        res.status(500).json("Error interno del servidor");
     }
 });
 
