@@ -88,7 +88,7 @@
   });
 
 
-  const client = new MercadoPagoConfig({ accessToken: process.env.ACCESS_TOKEN });
+  const client = new MercadoPagoConfig({ accessToken: "APP_USR-6277177060337111-050214-5becb05e5acc25f7070263ae0e1544ac-243071885" });
 
 
   app.post("/create_preference", async (req, res) => {
