@@ -123,6 +123,19 @@
 
 
     <script>
+function handleKeyPress(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); 
+        document.getElementById("loginButton").click();
+    }
+}
+
+
+document.querySelectorAll("input").forEach(input => {
+    input.addEventListener("keypress", handleKeyPress);
+});
+
+
 document.getElementById("loginButton").addEventListener("click", function() {
     const username = document.querySelector("input[name='username']").value;
     const password = document.querySelector("input[name='password']").value;
@@ -157,6 +170,7 @@ document.getElementById("loginButton").addEventListener("click", function() {
         console.error(error);
     });
 });
+
       </script>
 
 
