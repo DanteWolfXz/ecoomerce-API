@@ -13,6 +13,7 @@
   import cors from 'cors';
   import { MercadoPagoConfig, Preference } from 'mercadopago';
   import debug from 'debug';
+  import bodyParser from 'body-parser';
 
   dotenv.config();
 
@@ -20,6 +21,10 @@
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const port = process.env.PORT || 8000;
+  const corsOptions = {
+    origin: 'https://ecoomerce-api-v7wq.onrender.com/',
+    optionsSuccessStatus: 200,
+  };
 
   mongoose
     .connect(process.env.MONGO_URL)
@@ -30,6 +35,8 @@
 
   const app = express();
   app.use(cors({}));
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
 
   app.set('views', path.join(__dirname, 'CIENFUEGOS2'));
   app.set('view engine', 'ejs');
