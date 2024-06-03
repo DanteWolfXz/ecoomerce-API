@@ -30,23 +30,20 @@ router.post("/register", async (req, res) => {
     }
 });
 
-
-
 // LOGIN
 router.post("/login", async (req, res) => {
     try {
         const user = await User.findOne({ username: req.body.username });
         if (!user) {
-            return res.status(401).json("Credenciales Incorrectas");
+            return res.status(401).json("Usuario o contraseña incorrectos");
         }
 
         const hashedPassword = CryptoJS.AES.decrypt(
             user.password,
             process.env.PASS_SEC
-        );
-        const OGpassword = hashedPassword.toString(CryptoJS.enc.Utf8);
+        ).toString(CryptoJS.enc.Utf8);
 
-        if (OGpassword !== req.body.password) {
+        if (hashedPassword !== req.body.password) {
             return res.status(401).json("Contraseña incorrecta");
         }
 
@@ -66,7 +63,6 @@ router.post("/login", async (req, res) => {
     }
 });
 
-
 // LOGOUT
 router.post("/logout", (req, res) => {
     try { 
@@ -78,4 +74,3 @@ router.post("/logout", (req, res) => {
 });
 
 export default router;
-

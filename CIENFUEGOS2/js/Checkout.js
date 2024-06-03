@@ -60,8 +60,6 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
 });
 
 
-
-
 const createCheckoutButton = (preferenceId) => {
     const bricksBuilder = mp.bricks();
     
