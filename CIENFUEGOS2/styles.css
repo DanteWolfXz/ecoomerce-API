@@ -1350,3 +1350,31 @@
         font-size: 16px;
     }
 }
+
+
+
+
+
+/* ORDENES */
+
+
+main.table {
+    min-height: 100vh;
+    background: url(https://w.wallhaven.cc/full/wq/wallhaven-wqpmdr.jpg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+td-img {
+    width: 36px;
+    height: 36px;
+    margin-right: .5rem;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+table, th, td {
+    padding: 1rem;
+
+}
