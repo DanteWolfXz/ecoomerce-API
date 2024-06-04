@@ -1358,6 +1358,17 @@
 /* ORDENES */
 
 
+/* Estilo para el campo de búsqueda */
+#searchInput {
+    padding: 8px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+/* Estilo para la tabla */
 .table {
     width: 80%;
     margin: 20px auto;
@@ -1399,30 +1410,5 @@
     border-radius: 5px;
     font-size: 14px;
     outline: none;
-}
-
-/* Colores para cada estado */
-.table_status select option[value="pendiente"] {
-    background-color: #ffc107; /* Amarillo */
-    color: #333;
-}
-
-.table_status select option[value="entregado"] {
-    background-color: #28a745; /* Verde */
-    color: #fff;
-}
-
-.table_status select option[value="cancelado"] {
-    background-color: #dc3545; /* Rojo */
-    color: #fff;
-}
-
-
-#searchInput {
-    padding: 8px;
-    width: 300px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    font-size: 16px;
+    width: 100px; /* Ajusta el ancho según sea necesario */
 }

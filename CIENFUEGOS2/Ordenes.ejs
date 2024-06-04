@@ -64,10 +64,10 @@
                         <td class="table_date">11/7/2023</td>
                         <td class="table_pickup_date"><input type="datetime-local"></td>
                         <td class="table_status">
-                            <select>
-                                <option value="pendiente">Pendiente</option>
-                                <option value="entregado">Entregado</option>
-                                <option value="cancelado">Cancelado</option>
+                            <select id="statusSelect">
+                                <option value="pendiente" style="background-color: #ffc107;">Pendiente</option>
+                                <option value="entregado" style="background-color: #28a745;">Entregado</option>
+                                <option value="cancelado" style="background-color: #dc3545;">Cancelado</option>
                             </select>
                         </td>
                         <td class="table_total">$45.500</td>
@@ -76,6 +76,7 @@
             </table>
         </section>
     </main>
+    
     
     
     
@@ -187,6 +188,9 @@ document.getElementById("loginButton").addEventListener("click", function() {
 });
 
       </script>
+
+
+<script src="ordenes.js"></script>
 
 
 </body>
