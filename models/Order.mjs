@@ -19,6 +19,7 @@ const orderSchema = new Schema(
         amount: { type: Number, required: true},
         address: { type: Object, default: "undefined" },
         status: { type: String, default: "pending" },
+        delivered: { type: String, default: "false" },
     },
     { timestamps: true }
 );
