@@ -1358,23 +1358,61 @@
 /* ORDENES */
 
 
-main.table {
-    min-height: 100vh;
-    background: url(https://w.wallhaven.cc/full/wq/wallhaven-wqpmdr.jpg);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.table {
+    width: 80%;
+    margin: 20px auto;
 }
 
-td-img {
-    width: 36px;
-    height: 36px;
-    margin-right: .5rem;
+.table_header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.table_body table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table_body th, .table_body td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.table_body th {
+    background-color: #f2f2f2;
+}
+
+.table_body td {
+    text-align: center;
+}
+
+/* Estilos de la imagen de usuario */
+.table_user img {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    vertical-align: middle;
 }
 
-table, th, td {
-    padding: 1rem;
+/* Estilos para el estado de la orden */
+.table_status select {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
+}
 
+/* Colores para cada estado */
+.table_status select option[value="pendiente"] {
+    background-color: #ffc107; /* Amarillo */
+    color: #333;
+}
+
+.table_status select option[value="entregado"] {
+    background-color: #28a745; /* Verde */
+    color: #fff;
+}
+
+.table_status select option[value="cancelado"] {
+    background-color: #dc3545; /* Rojo */
+    color: #fff;
 }
