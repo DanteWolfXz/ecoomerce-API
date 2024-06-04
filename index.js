@@ -88,6 +88,10 @@
     res.render('pago-pendiente');
   });
 
+  app.get('/Ordenes', (req, res) => {
+    res.render('Ordenes');
+  });
+
   app.use(express.static(path.join(__dirname, 'CIENFUEGOS2')));
 
   app.get('/products/:id', function (req, res, next) {
