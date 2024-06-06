@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-      const userId = '123456789'; // Aquí deberías obtener el ID del usuario actual
+      const userId = localStorage.getItem('userId'); // Aquí deberías obtener el ID del usuario actual
       const accessToken = localStorage.getItem('accessToken'); // Obtener el token de acceso del localStorage
       const response = await fetch(`/api/users/profile/${userId}`, {
         headers: {
