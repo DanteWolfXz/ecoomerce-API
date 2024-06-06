@@ -89,4 +89,21 @@ router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
+// GET USER PROFILE INCLUDING ORDERS
+router.get("/profile/:id", verifyToken, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const orders = await Order.find({ userId: userId });
+        res.status(200).json({ user, orders });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
 export default router;
