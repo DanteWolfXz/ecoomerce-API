@@ -62,23 +62,20 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
 
 const createCheckoutButton = (preferenceId) => {
     const bricksBuilder = mp.bricks();
-    const container = document.getElementById("wallet_container");
-
+    
     const renderComponent = async () => {
-        // Eliminar el contenido del contenedor antes de renderizar el nuevo botón
-        container.innerHTML = "";
-
-        await bricksBuilder.create("wallet", container, {
+        if (window.checkoutButton) window.checkoutButton.unmount();
+        await bricksBuilder.create("wallet", "wallet_container", {
             initialization: {
                 preferenceId: preferenceId,
                 redirection: "blank",
             },
-            customization: {
-                texts: {
-                    valueProp: 'smart_option',
-                },
-            },
-        });
+         customization: {
+          texts: {
+           valueProp: 'smart_option',
+          },
+          },
+         });
     }
 
     renderComponent(); // Llama a la función para renderizar el botón
