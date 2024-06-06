@@ -1413,3 +1413,35 @@
     width: 100px; /* Ajusta el ancho según sea necesario */
     color: #ffc187;
 }
+
+
+/* Perfil Usuarios */
+
+.container2 {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+}
+
+.profile-info {
+    margin-top: 20px;
+}
+
+.profile-info p {
+    margin-bottom: 10px;
+}
+
+.profile-info p strong {
+    font-weight: bold;
+}
+
+.profile-info p span {
+    color: #333;
+}

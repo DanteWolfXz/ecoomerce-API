@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CIENFUEGOS</title>
+    <title>Perfil</title>
    
     <script src="https://kit.fontawesome.com/4340dc4f73.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="styles.css">
@@ -39,9 +39,21 @@
     </section>
 
 
-    <section class="perfil"></section>
-
-
+    <div class="container2">
+        <h1>Perfil de Usuario</h1>
+        <div class="profile">
+            <div class="profile-info">
+                <p><strong>Nombre de usuario:</strong> <span id="username"></span></p>
+                <p><strong>Correo electrónico:</strong> <span id="email"></span></p>
+                <p><strong>DNI:</strong> <span id="dni"></span></p>
+                <p><strong>Teléfono:</strong> <span id="phone"></span></p>
+            </div>
+            <div class="orders">
+                <h2>Pedidos del usuario:</h2>
+                <ul id="order-list"></ul>
+            </div>
+        </div>
+    </div>
 
 
     <section id="newsletter" class="section-p1 section-m1">
@@ -99,6 +111,8 @@
     </footer>
 
     <script src="js/userloged2.js"></script>
+
+    <script src="perfilusuario.js"></script>
 
 
 
