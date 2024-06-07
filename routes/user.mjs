@@ -89,7 +89,7 @@ router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// GET USER PROFILE INCLUDING ORDERS
+// GET USER PROFILE
 router.get("/profile/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.params.id;
@@ -100,9 +100,7 @@ router.get("/profile/:id", verifyToken, async (req, res) => {
             console.error("Usuario no encontrado");
             return res.status(404).json({ message: "User not found" });
         }
-        const orders = await Order.find({ userId: userId });
-        console.log("Pedidos del usuario:", orders); // Agrega un registro de consola para los pedidos del usuario
-        res.status(200).json({ user, orders });
+        res.status(200).json({ user });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Internal Server Error" });
