@@ -7,7 +7,7 @@ if (accessToken) {
         <a href="mi-cuenta" class="dropbtn">Mi Cuenta</a>
         <div class="dropdown-content">
             <a href="/mi-cuenta">Perfil</a>
-            <a href="#">Mis Pedidos</a>
+            <a href="/mi-cuenta">Mis Pedidos</a>
             <a href="#" id="logout">Cerrar Sesion</a>
         </div>
     </li>`;
