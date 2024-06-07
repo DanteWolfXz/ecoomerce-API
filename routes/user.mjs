@@ -93,11 +93,15 @@ router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
 router.get("/profile/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.params.id;
+        console.log("ID del usuario:", userId); // Agrega un registro de consola para el ID del usuario
         const user = await User.findById(userId);
+        console.log("Usuario encontrado:", user); // Agrega un registro de consola para el usuario encontrado
         if (!user) {
+            console.error("Usuario no encontrado");
             return res.status(404).json({ message: "User not found" });
         }
         const orders = await Order.find({ userId: userId });
+        console.log("Pedidos del usuario:", orders); // Agrega un registro de consola para los pedidos del usuario
         res.status(200).json({ user, orders });
     } catch (err) {
         console.error(err);
