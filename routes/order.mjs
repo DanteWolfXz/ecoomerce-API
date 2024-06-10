@@ -44,8 +44,8 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
 router.get("/find/:userid", verifyTokenAndAuthorization, async (req, res) => {
     try {
         const orders = await Order.find({ userid: req.params.userid });
-        if (!orders) {
-            return res.status(404).json({ message: "Order not found" });
+        if (!orders || orders.length === 0) {
+            return res.status(404).json({ message: "No se encontraron pedidos" });
         }
         res.status(200).json(orders);
     } catch (err) {
