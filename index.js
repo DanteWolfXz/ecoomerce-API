@@ -160,8 +160,10 @@ app.post("/webhook", async (req, res) => {
           const data = await response.json();
           console.log("Datos del pago:", data);
 
+          // Verifica que userId no sea nulo
+          const userId = data.payer && data.payer.id ? data.payer.id : "unknown_user";
           const orderData = {
-              userid: data.payer.id, // Ajusta esto según los datos de la respuesta de MercadoPago
+              userId: userId, 
               products: data.additional_info.items.map(item => ({
                   productId: item.id,
                   quantity: item.quantity
@@ -169,7 +171,7 @@ app.post("/webhook", async (req, res) => {
               amount: data.transaction_details.total_paid_amount,
               address: data.payer.address || "undefined",
               status: data.status, // Ajusta esto según los datos que deseas guardar
-              delivered: "false"
+              delivered: false
           };
 
           const orderCreationResponse = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
