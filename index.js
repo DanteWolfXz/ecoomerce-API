@@ -152,7 +152,7 @@ app.post("/webhook", async (req, res) => {
       const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
           method: "GET",
           headers: {
-              'Authorization': `Bearer  ${client.accessToken}`
+              'Authorization': `Bearer ${client.accessToken}`
           }
       });
 
@@ -160,24 +160,35 @@ app.post("/webhook", async (req, res) => {
           const data = await response.json();
           console.log("Datos del pago:", data);
 
-          // Aquí deberías llamar a la ruta de creación de órdenes en tu aplicación
+          const orderData = {
+              userid: data.payer.id, // Ajusta esto según los datos de la respuesta de MercadoPago
+              products: data.additional_info.items.map(item => ({
+                  productId: item.id,
+                  quantity: item.quantity
+              })),
+              amount: data.transaction_details.total_paid_amount,
+              address: data.payer.address || "undefined",
+              status: data.status, // Ajusta esto según los datos que deseas guardar
+              delivered: "false"
+          };
+
           const orderCreationResponse = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${tuTokenDeAutenticación}`
               },
-              body: JSON.stringify({
-                  // Aquí deberías pasar los datos necesarios para crear la orden
-                  // Puedes usar los datos de la respuesta del pago de MercadoPago
-                  // o cualquier otra información relevante
-              })
+              body: JSON.stringify(orderData)
           });
 
-          console.log('Respuesta de creación de orden:', orderCreationResponse);
-          
-          
-          res.sendStatus(200);
+          if (orderCreationResponse.ok) {
+              const orderCreationResult = await orderCreationResponse.json();
+              console.log('Orden creada exitosamente:', orderCreationResult);
+              res.sendStatus(200);
+          } else {
+              console.error('Error al crear la orden:', await orderCreationResponse.text());
+              res.sendStatus(500);
+          }
       } else {
           console.error("Error al obtener datos del pago:", response.statusText);
           res.sendStatus(500);
