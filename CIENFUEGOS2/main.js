@@ -33,7 +33,7 @@ function mostrarProductos(productos) {
                 <div class="star">
                     ${Array.from({ length: producto.estrellas }, () => '<i class="fa-solid fa-star"></i>').join('')}
                 </div>
-                <h4>${producto.precio}</h4>
+                <h4>$ ${producto.precio}</h4>
             </div>
             <button class="add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio}" data-imagen="${producto.imagen}">
                 <span class="al-carrito">Añadir</span>
