@@ -4,6 +4,7 @@ import Order from "../models/Order.mjs";
 
 const router = express.Router();
 
+
 // UPDATE ORDER
 router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
     try {
@@ -40,9 +41,9 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
 });
 
 // GET USER ORDERS
-router.get("/find/:id", verifyTokenAndAuthorization, async (req, res) => {
+router.get("/find/:userid", verifyTokenAndAuthorization, async (req, res) => {
     try {
-        const orders = await Order.find({ userId: req.params.userid });
+        const orders = await Order.find({ userid: req.params.userid });
         if (!orders) {
             return res.status(404).json({ message: "Order not found" });
         }
