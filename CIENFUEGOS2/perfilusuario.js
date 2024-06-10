@@ -47,7 +47,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     orders.forEach(order => {
                         const listItem = document.createElement('li');
-                        listItem.textContent = `ID del Pedido: ${order._id}, Productos: ${order.products.map(product => product.productId).join(', ')}, Monto: ${order.amount}, Estado: ${order.status}`;
+                        listItem.innerHTML = `
+                            <strong>ID del Pedido:</strong> ${order._id}<br>
+                            <strong>Productos:</strong> ${order.products.map(product => product.productId).join(', ')}<br>
+                            <strong>Monto:</strong> ${order.amount}<br>
+                            <strong>Estado:</strong> ${order.status}
+                        `;
                         orderList.appendChild(listItem);
                     });
                 }
