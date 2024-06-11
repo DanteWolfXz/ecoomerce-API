@@ -101,7 +101,6 @@
 
   const client = new MercadoPagoConfig({ accessToken: "APP_USR-6277177060337111-050214-5becb05e5acc25f7070263ae0e1544ac-243071885" });
 
-
   app.post("/create_preference", async (req, res) => {
     try {
         const idempotencyKey = req.headers['x-idempotency-key'];
@@ -110,12 +109,6 @@
         const orderDataList = req.body; 
         console.log("Datos recibidos del frontend:", orderDataList);
 
-        // Verifica que se haya recibido una lista válida de datos del pedido
-        if (!Array.isArray(orderDataList) || orderDataList.length === 0) {
-            return res.status(400).json({ error: "La lista de datos del pedido es inválida o está vacía." });
-        }
-
-        // Mapea los datos del pedido para crear los items de la preferencia
         const items = orderDataList.map(orderData => ({
             title: orderData.title,
             unit_price: Number(orderData.price),
@@ -123,7 +116,6 @@
             currency_id: "ARS",
         }));
 
-        // Cuerpo de la preferencia
         const body = {
             items: items,
             back_urls: {
@@ -131,12 +123,11 @@
                 failure: "https://ecoomerce-api-v7wq.onrender.com/pago-denegado",
                 pending: "https://ecoomerce-api-v7wq.onrender.com/pago-pendiente",
             },
-            auto_return: "approved", // Ajuste: corregido a auto_return
+            autor_return: "approved",
             notification_url: "https://ecoomerce-api-v7wq.onrender.com/webhook",
         };
 
-        // Crea la preferencia en MercadoPago
-        const preference = new Preference(client); // Asegúrate de inicializar 'client' correctamente
+        const preference = new Preference(client);
         const result = await preference.create({ body, idempotencyKey });
         console.log("Preferencia creada:", result);
 
@@ -151,70 +142,73 @@
     }
 });
 
-// Endpoint para recibir notificaciones de MercadoPago
 app.post("/webhook", async (req, res) => {
-    try {
-        const paymentId = req.query.id;
-        console.log("ID del pago recibido en el webhook:", paymentId);
+  try {
+      const body = req.body;
+      console.log("Datos recibidos en el webhook:", body);
 
-        // Verifica que se haya recibido un ID de pago válido
-        if (!paymentId) {
-            console.error("ID del pago no recibido en la solicitud.");
-            return res.status(400).json({ error: "ID del pago no recibido en la solicitud." });
-        }
+      // Verificar que la solicitud tenga los datos esperados
+      if (!body || !body.data || !body.data.id) {
+          console.error("Datos incompletos en la solicitud webhook.");
+          return res.status(400).json({ error: "Datos incompletos en la solicitud webhook." });
+      }
 
-        // Obtiene los detalles del pago desde MercadoPago
-        const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-            method: "GET",
-            headers: {
-                'Authorization': `Bearer ${client.accessToken}` // Asegúrate de tener 'client.accessToken' configurado
-            }
-        });
+      const paymentId = body.data.id;
+      console.log("ID del pago recibido en el webhook:", paymentId);
 
-        if (!response.ok) {
-            console.error("Error al obtener datos del pago desde MercadoPago:", response.statusText);
-            return res.status(500).json({ error: "Error al obtener datos del pago desde MercadoPago." });
-        }
+      // Obtener los detalles del pago desde MercadoPago
+      const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+          method: "GET",
+          headers: {
+              'Authorization': `Bearer ${client.accessToken}`
+          }
+      });
 
-        const data = await response.json();
-        console.log("Datos del pago recibidos:", data);
+      if (!response.ok) {
+          console.error("Error al obtener datos del pago desde MercadoPago:", response.statusText);
+          return res.status(500).json({ error: "Error al obtener datos del pago desde MercadoPago." });
+      }
 
-        // Verifica que userId no sea nulo
-        const userId = data.payer && data.payer.id ? data.payer.id : "unknown_user";
-        const orderData = {
-            userId: userId,
-            products: data.additional_info.items.map(item => ({
-                productId: item.id,
-                quantity: item.quantity
-            })),
-            amount: data.transaction_details.total_paid_amount,
-            address: data.payer.address || "undefined",
-            status: data.status, // Ajusta esto según los datos que deseas guardar
-            delivered: false
-        };
+      const data = await response.json();
+      console.log("Datos del pago recibidos:", data);
 
-        // Crea la orden en tu sistema
-        const orderCreationResponse = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${client.accessToken}` // Ajusta tuTokenDeAutenticación correctamente
-            },
-            body: JSON.stringify(orderData)
-        });
+      // Procesar los datos del pago para crear una orden en tu sistema
+      const userId = data.payer && data.payer.id ? data.payer.id : "unknown_user";
+      const orderData = {
+          userId: userId,
+          products: data.additional_info.items.map(item => ({
+              productId: item.id,
+              quantity: item.quantity
+          })),
+          amount: data.transaction_details.total_paid_amount,
+          address: data.payer.address || "undefined",
+          status: data.status,
+          delivered: false
+      };
 
-        if (orderCreationResponse.ok) {
-            const orderCreationResult = await orderCreationResponse.json();
-            console.log('Orden creada exitosamente:', orderCreationResult);
-            res.sendStatus(200);
-        } else {
-            console.error('Error al crear la orden:', await orderCreationResponse.text());
-            res.sendStatus(500);
-        }
-    } catch (error) {
-        console.error('Error en el webhook:', error);
-        res.sendStatus(500);
-    }
+      // Crear la orden en tu sistema (aquí debes implementar la lógica específica)
+      const orderCreationResponse = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${client.accessToken}` // Asegúrate de ajustar esto correctamente
+          },
+          body: JSON.stringify(orderData)
+      });
+
+      if (orderCreationResponse.ok) {
+          const orderCreationResult = await orderCreationResponse.json();
+          console.log('Orden creada exitosamente:', orderCreationResult);
+          res.sendStatus(200);
+      } else {
+          const errorText = await orderCreationResponse.text();
+          console.error('Error al crear la orden:', errorText);
+          res.status(500).json({ error: "Error al crear la orden." });
+      }
+  } catch (error) {
+      console.error('Error en el webhook:', error);
+      res.sendStatus(500);
+  }
 });
 
 
