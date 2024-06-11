@@ -99,7 +99,11 @@
   });
 
 
-  const client = new MercadoPagoConfig({ accessToken: "APP_USR-6277177060337111-050214-5becb05e5acc25f7070263ae0e1544ac-243071885" });
+  const client = new MercadoPagoConfig({
+    accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
+  });
+  
+
   app.post('/create_preference', async (req, res) => {
     try {
       const idempotencyKey = req.headers['x-idempotency-key'];
