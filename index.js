@@ -145,6 +145,9 @@
       });
     }
   });
+
+
+  //WEBHOOK//
   
   app.post('/webhook', async (req, res) => {
     try {
@@ -152,16 +155,26 @@
       console.log('Datos recibidos en el webhook:', body);
   
       // Verificar la estructura de los datos recibidos
-      if (!body || !body.data || !body.data.id) {
+      if (!body || !body.resource || !body.topic) {
         console.error('Datos incompletos en la solicitud webhook.');
         return res.status(400).json({ error: 'Datos incompletos en la solicitud webhook.' });
       }
   
-      const paymentId = body.data.id;
-      console.log('ID del pago recibido en el webhook:', paymentId);
+      const resourceUrl = body.resource;
+      console.log('URL del recurso recibido:', resourceUrl);
   
-      // Obtener los detalles del pago desde MercadoPago
-      const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      // Extraer el merchant_order_id del resourceUrl
+      const regex = /merchant_orders\/(\d+)/;
+      const match = resourceUrl.match(regex);
+      if (!match || match.length < 2) {
+        console.error('No se pudo extraer el merchant_order_id del resource.');
+        return res.status(400).json({ error: 'Error en la URL del resource.' });
+      }
+      const merchantOrderId = match[1];
+      console.log('ID del merchant_order recibido en el webhook:', merchantOrderId);
+  
+      // Obtener los detalles del merchant_order desde MercadoPago
+      const response = await fetch(`https://api.mercadolibre.com/merchant_orders/${merchantOrderId}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
@@ -169,23 +182,23 @@
       });
   
       if (!response.ok) {
-        console.error('Error al obtener datos del pago desde MercadoPago:', response.statusText);
-        return res.status(500).json({ error: 'Error al obtener datos del pago desde MercadoPago.' });
+        console.error('Error al obtener datos del merchant_order desde MercadoPago:', response.statusText);
+        return res.status(500).json({ error: 'Error al obtener datos del merchant_order desde MercadoPago.' });
       }
   
       const data = await response.json();
-      console.log('Datos del pago recibidos:', data);
+      console.log('Datos del merchant_order recibidos:', data);
   
-      // Procesar los datos del pago para crear una orden en tu sistema (ajusta esto según tu lógica)
+      // Procesar los datos del merchant_order para crear una orden en tu sistema (ajusta esto según tu lógica)
       const orderData = {
         userId: data.payer && data.payer.id ? data.payer.id : 'unknown_user',
-        products: data.additional_info.items.map(item => ({
+        products: data.items.map(item => ({
           productId: item.id,
           quantity: item.quantity,
         })),
-        amount: data.transaction_details.total_paid_amount,
-        address: data.payer.address || 'undefined',
-        status: data.status,
+        amount: data.total_amount,
+        address: data.shipments[0].receiver_address || 'undefined',
+        status: 'paid', // Aquí puedes ajustar el estado de la orden según los datos recibidos
         delivered: false,
       };
   
@@ -213,6 +226,7 @@
       res.sendStatus(500);
     }
   });
+  
   
 
 
