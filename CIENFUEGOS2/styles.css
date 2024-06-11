@@ -1419,29 +1419,54 @@
 
 .container2 {
     max-width: 800px;
-    margin: 50px auto;
+    margin: 0 auto;
     padding: 20px;
-    background-color: #fff;
-    border-radius: 5px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
+h1, h2 {
     text-align: center;
+    color: #333;
 }
 
-.profile-info {
-    margin-top: 20px;
+.profile-info p, .orders ul {
+    margin: 0;
+    padding: 0;
 }
 
 .profile-info p {
     margin-bottom: 10px;
 }
 
-.profile-info p strong {
+.orders ul {
+    list-style-type: none;
+}
+
+.orders li {
+    background-color: #fff;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.orders li span {
     font-weight: bold;
 }
 
-.profile-info p span {
-    color: #333;
+.status-entregado {
+    color: green;
+}
+
+.status-pendiente {
+    color: yellow;
+}
+
+.status-cancelado {
+    color: red;
 }

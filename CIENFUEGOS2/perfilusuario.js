@@ -31,7 +31,7 @@ async function obtenerPerfilUsuario(userId, accessToken) {
             console.error('Error al obtener los datos del usuario:', profileResponse.statusText);
         }
     } catch (error) {
-        console.error('Error al obtener el perfil del usuario:', error);
+        console.error('Error al obtener los datos del usuario:', error);
     }
 }
 
@@ -57,11 +57,15 @@ async function obtenerPedidosUsuario(userId, accessToken) {
             } else {
                 orders.forEach(order => {
                     const listItem = document.createElement('li');
+                    const statusClass = getStatusClass(order.status);
+
                     listItem.innerHTML = `
-                        <strong>ID del Pedido:</strong> ${order._id}<br>
-                        <strong>Productos:</strong> ${order.products.map(product => product.productId).join(', ')}<br>
-                        <strong>Monto:</strong> ${order.amount}<br>
-                        <strong>Estado:</strong> ${order.status}
+                        <div>
+                            <strong>ID del Pedido:</strong> ${order._id}<br>
+                            <strong>Productos:</strong> ${order.products.map(product => product.productId).join(', ')}<br>
+                            <strong>Monto:</strong> ${order.amount}<br>
+                            <strong>Estado:</strong> <span class="${statusClass}">${order.status}</span>
+                        </div>
                     `;
                     orderList.appendChild(listItem);
                 });
@@ -71,5 +75,18 @@ async function obtenerPedidosUsuario(userId, accessToken) {
         }
     } catch (error) {
         console.error('Error al obtener los pedidos del usuario:', error);
+    }
+}
+
+function getStatusClass(status) {
+    switch (status.toLowerCase()) {
+        case 'entregado':
+            return 'status-entregado';
+        case 'pendiente':
+            return 'status-pendiente';
+        case 'cancelado':
+            return 'status-cancelado';
+        default:
+            return '';
     }
 }
