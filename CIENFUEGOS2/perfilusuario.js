@@ -19,10 +19,8 @@ async function obtenerPerfilUsuario(userId, accessToken) {
             }
         });
 
-        console.log("Respuesta del servidor (perfil):", profileResponse);
-
         if (profileResponse.ok) {
-            const user = await profileResponse.json();
+            const { user } = await profileResponse.json();
             console.log("Datos del usuario:", user);
 
             document.getElementById('username').textContent = user.username;
@@ -33,7 +31,7 @@ async function obtenerPerfilUsuario(userId, accessToken) {
             console.error('Error al obtener los datos del usuario:', profileResponse.statusText);
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al obtener el perfil del usuario:', error);
     }
 }
 
@@ -44,8 +42,6 @@ async function obtenerPedidosUsuario(userId, accessToken) {
                 'Authorization': `Bearer ${accessToken}`
             }
         });
-
-        console.log("Respuesta del servidor (pedidos):", ordersResponse);
 
         if (ordersResponse.ok) {
             const orders = await ordersResponse.json();
@@ -74,6 +70,6 @@ async function obtenerPedidosUsuario(userId, accessToken) {
             console.error('Error al obtener los pedidos del usuario:', ordersResponse.statusText);
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al obtener los pedidos del usuario:', error);
     }
 }
