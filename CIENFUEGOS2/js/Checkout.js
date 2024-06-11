@@ -16,7 +16,6 @@ const generateIdempotencyKey = () => {
 const idempotencyKey = generateIdempotencyKey();
 console.log(idempotencyKey);
 
-
 document.getElementById('continuar-pago').addEventListener('click', async () => {
     try {
         const productosEnCarrito = document.querySelectorAll('#cart-table-body tr'); // Obtener todas las filas de productos en el carrito
@@ -59,24 +58,28 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
     }
 });
 
-
 const createCheckoutButton = (preferenceId) => {
     const bricksBuilder = mp.bricks();
-    
+
     const renderComponent = async () => {
+        // Limpiar el contenedor del botón antes de crear uno nuevo
+        const walletContainer = document.getElementById('wallet_container');
+        walletContainer.innerHTML = '';
+
         if (window.checkoutButton) window.checkoutButton.unmount();
-        await bricksBuilder.create("wallet", "wallet_container", {
+        window.checkoutButton = await bricksBuilder.create("wallet", "wallet_container", {
             initialization: {
                 preferenceId: preferenceId,
                 redirection: "blank",
             },
-         customization: {
-          texts: {
-           valueProp: 'smart_option',
-          },
-          },
-         });
+            customization: {
+                texts: {
+                    valueProp: 'smart_option',
+                },
+            },
+        });
     }
 
     renderComponent(); // Llama a la función para renderizar el botón
 }
+
