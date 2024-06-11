@@ -169,23 +169,34 @@ async function getProductDetails(productId) {
   }
 }
 
+
 // Ruta para manejar el webhook de MercadoPago
 app.post('/webhook', async (req, res) => {
   try {
     const body = req.body;
+    const userAccessToken = req.headers['authorization']; // Asumiendo que el token del usuario se envía en el encabezado 'authorization'
     console.log('Datos recibidos en el webhook:', body);
 
-    // Verificar la estructura de los datos recibidos
-    if (!body || !body.data || !body.data.id) {
+    // Decodificar el accessToken del usuario para obtener el userId
+    let userId;
+    try {
+      const decodedToken = jwt.decode(userAccessToken);
+      userId = decodedToken.userId; // Ajusta esto según la estructura de tu JWT
+    } catch (error) {
+      console.error('Error al decodificar el accessToken del usuario:', error);
+      return res.status(400).json({ error: 'Token de usuario inválido.' });
+    }
+
+    if (!body || !body.resource || !body.topic) {
       console.error('Datos incompletos en la solicitud webhook.');
       return res.status(400).json({ error: 'Datos incompletos en la solicitud webhook.' });
     }
 
-    const paymentId = body.data.id;
-    console.log('ID del pago recibido en el webhook:', paymentId);
+    const resourceUrl = body.resource;
+    console.log('Resource URL recibido en el webhook:', resourceUrl);
 
-    // Obtener los detalles del pago desde MercadoPago
-    const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+    // Obtener los detalles del merchant_order desde MercadoPago
+    const response = await fetch(resourceUrl, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
@@ -193,15 +204,15 @@ app.post('/webhook', async (req, res) => {
     });
 
     if (!response.ok) {
-      console.error('Error al obtener datos del pago desde MercadoPago:', response.statusText);
-      return res.status(500).json({ error: 'Error al obtener datos del pago desde MercadoPago.' });
+      console.error('Error al obtener datos desde MercadoPago:', response.statusText);
+      return res.status(500).json({ error: 'Error al obtener datos desde MercadoPago.' });
     }
 
     const data = await response.json();
-    console.log('Datos del pago recibidos:', data);
+    console.log('Datos del merchant_order recibidos:', data);
 
-    // Procesar los datos del pago para crear una orden en tu sistema
-    const productsPromises = data.additional_info.items.map(async item => {
+    // Procesar los datos del merchant_order para crear una orden en tu sistema
+    const productsPromises = data.items.map(async item => {
       const productName = await getProductDetails(item.id); // Obtener el nombre del producto
       return {
         productName: productName || 'Producto desconocido', // Manejar el caso en que no se pueda obtener el nombre
@@ -214,10 +225,10 @@ app.post('/webhook', async (req, res) => {
 
     // Crear la estructura de datos para la orden
     const orderData = {
-      userId: data.payer && data.payer.id ? data.payer.id : 'unknown_user',
+      userId: userId || 'unknown_user',
       products: products,
-      amount: data.transaction_details.total_paid_amount,
-      address: data.payer.address || 'undefined',
+      amount: data.total_amount,
+      address: data.shipping ? data.shipping.receiver_address : 'undefined',
       status: data.status,
       delivered: false,
     };
@@ -227,7 +238,7 @@ app.post('/webhook', async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+        Authorization: userAccessToken, // Utilizar el accessToken del usuario
       },
       body: JSON.stringify(orderData),
     });
