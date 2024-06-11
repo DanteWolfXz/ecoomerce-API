@@ -14,6 +14,7 @@
   import { MercadoPagoConfig, Preference } from 'mercadopago';
   import debug from 'debug';
   import bodyParser from 'body-parser';
+  import fetch from 'node-fetch';
 
   dotenv.config();
 
@@ -145,13 +146,12 @@
     }
   });
   
-  // Ruta para manejar el webhook de MercadoPago
   app.post('/webhook', async (req, res) => {
     try {
       const body = req.body;
       console.log('Datos recibidos en el webhook:', body);
   
-      // Verificar que la solicitud tenga los datos esperados
+      // Verificar la estructura de los datos recibidos
       if (!body || !body.data || !body.data.id) {
         console.error('Datos incompletos en la solicitud webhook.');
         return res.status(400).json({ error: 'Datos incompletos en la solicitud webhook.' });
@@ -213,6 +213,7 @@
       res.sendStatus(500);
     }
   });
+  
 
 
 
