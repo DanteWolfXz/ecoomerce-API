@@ -42,6 +42,13 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
             }
         });
 
+        // Obtener el userId desde localStorage
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+            // Agregar el userId al objeto orderDataList
+            orderDataList.push({ userId: userId });
+        }
+
         const response = await fetch("https://ecoomerce-api-v7wq.onrender.com/create_preference", {
             method: "POST",
             headers: {
@@ -57,6 +64,7 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
         alert("error :(");
     }
 });
+
 
 const createCheckoutButton = (preferenceId) => {
     const bricksBuilder = mp.bricks();
