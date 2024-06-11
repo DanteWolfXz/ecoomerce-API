@@ -163,7 +163,7 @@ app.post("/webhook", async (req, res) => {
           // Verifica que userId no sea nulo
           const userId = data.payer && data.payer.id ? data.payer.id : "unknown_user";
           const orderData = {
-              userId: userId, 
+              userId: userId,
               products: data.additional_info.items.map(item => ({
                   productId: item.id,
                   quantity: item.quantity
@@ -178,7 +178,7 @@ app.post("/webhook", async (req, res) => {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${tuTokenDeAutenticación}`
+                  'Authorization': `Bearer ${client.accessToken}` // Asegúrate de ajustar esto correctamente
               },
               body: JSON.stringify(orderData)
           });
@@ -196,7 +196,7 @@ app.post("/webhook", async (req, res) => {
           res.sendStatus(500);
       }
   } catch (error) {
-      console.error('Error:', error);
+      console.error('Error en el webhook:', error);
       res.sendStatus(500);
   }
 });
