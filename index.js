@@ -212,16 +212,10 @@ app.post('/webhook', async (req, res) => {
     console.log('Datos del merchant_order recibidos:', data);
 
     // Procesar los datos del merchant_order para crear una orden en tu sistema
-    const productsPromises = data.items.map(async item => {
-      const productName = await getProductDetails(item.id); // Obtener el nombre del producto
-      return {
-        productName: productName || 'Producto desconocido', // Manejar el caso en que no se pueda obtener el nombre
-        quantity: item.quantity,
-      };
-    });
-
-    // Esperar todas las solicitudes de detalles de productos
-    const products = await Promise.all(productsPromises);
+    const products = data.items.map(item => ({
+      productId: item.id, // Manteniendo el productId en lugar del nombre del producto
+      quantity: item.quantity,
+    }));
 
     // Crear la estructura de datos para la orden
     const orderData = {
@@ -257,9 +251,6 @@ app.post('/webhook', async (req, res) => {
     res.sendStatus(500);
   }
 });
-  
-
-
 
   app.listen(process.env.PORT || 8000, () => {
     console.log('Backend server is running!');
