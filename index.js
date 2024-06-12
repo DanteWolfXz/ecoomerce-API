@@ -197,6 +197,8 @@ app.post('/create_preference', async (req, res) => {
 });
 
 
+
+// Define la función createOrder antes de usarla en el webhook
 const createOrder = async (orderData) => {
   try {
     const response = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
@@ -221,6 +223,7 @@ const createOrder = async (orderData) => {
   }
 };
 
+// Define la ruta del webhook
 app.post('/webhook', async (req, res) => {
   try {
     console.log('Webhook data received:', JSON.stringify(req.body, null, 2));
