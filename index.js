@@ -197,8 +197,7 @@ app.post('/create_preference', async (req, res) => {
 });
 
 
-
-// Define la función createOrder antes de usarla en el webhook
+// Función para crear la orden en tu base de datos
 const createOrder = async (orderData) => {
   try {
     const response = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
@@ -223,58 +222,14 @@ const createOrder = async (orderData) => {
   }
 };
 
-// Define la ruta del webhook
+// Ruta del webhook
 app.post('/webhook', async (req, res) => {
   try {
     console.log('Webhook data received:', JSON.stringify(req.body, null, 2));
 
     const body = req.body;
 
-    if (body.topic === 'merchant_order' && body.resource) {
-      const resourceUrl = body.resource;
-
-      // Fetch merchant order details
-      const orderResponse = await fetch(resourceUrl, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`
-        }
-      });
-
-      if (!orderResponse.ok) {
-        const errorText = await orderResponse.text();
-        console.error('Error fetching merchant order:', errorText);
-        return res.status(500).json({ error: 'Error fetching merchant order.' });
-      }
-
-      const orderData = await orderResponse.json();
-
-      if (orderData.order_status === 'paid') {
-        const products = orderData.items.map(item => ({
-          title: item.title,
-          quantity: item.quantity,
-          price: item.unit_price
-        }));
-
-        const order = {
-          userId: '6663703d05baaecba088b074', // Obtén esto de los datos del frontend
-          preferenceId: orderData.preference_id,
-          merchantOrderId: orderData.id,
-          status: orderData.order_status,
-          totalAmount: orderData.total_amount,
-          products: products,
-          payer: {
-            email: orderData.payer.email
-          }
-        };
-
-        const createdOrder = await createOrder(order);
-        console.log('Order created successfully:', createdOrder);
-        res.sendStatus(200);
-      } else {
-        res.sendStatus(200);
-      }
-    } else if (body.topic === 'payment' && body.data && body.data.id) {
+    if (body.topic === 'payment' && body.data && body.data.id) {
       const paymentId = body.data.id;
 
       // Fetch payment details
@@ -294,9 +249,49 @@ app.post('/webhook', async (req, res) => {
       const paymentData = await paymentResponse.json();
       console.log('Payment data received:', paymentData);
 
-      // Aquí puedes procesar los datos de pago si es necesario
+      // Check if payment is approved
+      if (paymentData.collection.status === 'approved') {
+        const merchantOrderId = paymentData.collection.merchant_order_id;
 
-      res.sendStatus(200);
+        // Fetch merchant order details
+        const orderResponse = await fetch(`https://api.mercadolibre.com/merchant_orders/${merchantOrderId}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`
+          }
+        });
+
+        if (!orderResponse.ok) {
+          const errorText = await orderResponse.text();
+          console.error('Error fetching merchant order:', errorText);
+          return res.status(500).json({ error: 'Error fetching merchant order.' });
+        }
+
+        const orderData = await orderResponse.json();
+        const products = orderData.items.map(item => ({
+          title: item.title,
+          quantity: item.quantity,
+          price: item.unit_price
+        }));
+
+        const order = {
+          userId: '6663703d05baaecba088b074', // Obtén esto de los datos del frontend
+          preferenceId: orderData.preference_id,
+          merchantOrderId: orderData.id,
+          status: 'approved', // Orden aprobada
+          totalAmount: orderData.total_amount,
+          products: products,
+          payer: {
+            email: orderData.payer.email
+          }
+        };
+
+        const createdOrder = await createOrder(order);
+        console.log('Order created successfully:', createdOrder);
+        res.sendStatus(200);
+      } else {
+        res.sendStatus(200);
+      }
     } else {
       console.error('Invalid resource URL or unsupported topic:', body.resource, body.topic);
       res.status(400).json({ error: 'Invalid resource URL or unsupported topic' });
