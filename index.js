@@ -152,7 +152,7 @@
     }
 });
 
-// Ruta para manejar el webhook de MercadoPago
+// Ruta para manejar la creación de preferencias de pago
 app.post('/create_preference', async (req, res) => {
   try {
       const idempotencyKey = req.headers['x-idempotency-key'];
@@ -196,6 +196,7 @@ app.post('/create_preference', async (req, res) => {
   }
 });
 
+// Ruta para manejar el webhook de MercadoPago
 app.post('/webhook', async (req, res) => {
   try {
       const body = req.body;
@@ -211,42 +212,48 @@ app.post('/webhook', async (req, res) => {
 
       const data = await response.json();
 
-      // Procesar los datos del merchant_order para crear una orden en tu sistema
-      const products = data.items.map(item => ({
-          title: item.title,
-          quantity: item.quantity,
-          price: item.unit_price,
-      }));
+      // Verifica que la orden haya sido pagada antes de continuar
+      if (data.order_status === 'paid') {
+          const products = data.items.map(item => ({
+              title: item.title,
+              quantity: item.quantity,
+              price: item.unit_price,
+          }));
 
-      const orderData = {
-          userId: data.payer.id || 'unknown_user', // Usar el userId recibido en el webhook
-          preferenceId: data.preference_id,
-          merchantOrderId: data.id,
-          status: data.status,
-          totalAmount: data.total_amount,
-          products: products,
-          payer: {
-              email: data.payer.email
+          const orderData = {
+              userId: data.payer.id || 'unknown_user', // Usar el userId recibido en el webhook
+              preferenceId: data.preference_id,
+              merchantOrderId: data.id,
+              status: data.order_status,
+              totalAmount: data.total_amount,
+              products: products,
+              payer: {
+                  email: data.payer.email
+              }
+          };
+
+          // Guardar la orden en tu base de datos
+          const orderCreationResponse = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: req.headers['authorization'], // Utilizar el accessToken del usuario
+              },
+              body: JSON.stringify(orderData),
+          });
+
+          if (orderCreationResponse.ok) {
+              res.sendStatus(200);
+          } else {
+              const errorText = await orderCreationResponse.text();
+              res.status(500).json({ error: 'Error al crear la orden.', details: errorText });
           }
-      };
-
-      // Guardar la orden en tu base de datos
-      const orderCreationResponse = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-              Authorization: req.headers['authorization'], // Utilizar el accessToken del usuario
-          },
-          body: JSON.stringify(orderData),
-      });
-
-      if (orderCreationResponse.ok) {
-          res.sendStatus(200);
       } else {
-          const errorText = await orderCreationResponse.text();
-          res.status(500).json({ error: 'Error al crear la orden.' });
+          // Si la orden no está pagada, responde con un 200 OK para que MercadoPago no reintente la notificación
+          res.sendStatus(200);
       }
   } catch (error) {
+      console.error('Error handling webhook:', error);
       res.sendStatus(500);
   }
 });
