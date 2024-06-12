@@ -200,6 +200,13 @@ app.post('/create_preference', async (req, res) => {
 app.post('/webhook', async (req, res) => {
   try {
       const body = req.body;
+
+      // Verificar si resourceUrl está presente y es una URL válida
+      if (!body.resource || !body.resource.startsWith('https://')) {
+          console.error('Invalid resource URL:', body.resource);
+          return res.status(400).json({ error: 'Invalid resource URL' });
+      }
+
       const resourceUrl = body.resource;
 
       // Obtener los detalles del merchant_order desde MercadoPago
@@ -257,6 +264,7 @@ app.post('/webhook', async (req, res) => {
       res.sendStatus(500);
   }
 });
+
 
 
   app.listen(process.env.PORT || 8000, () => {
