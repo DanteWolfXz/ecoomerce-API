@@ -105,52 +105,7 @@
   });
   
 
-  app.post('/create_preference', async (req, res) => {
-    try {
-        const idempotencyKey = req.headers['x-idempotency-key'];
-        console.log('Idempotency Key:', idempotencyKey);
 
-        const orderDataList = req.body;
-        console.log('Datos recibidos del frontend:', orderDataList);
-
-        // Extraer el userId de orderDataList
-        const userIdObject = orderDataList.find(item => item.userId);
-        const userId = userIdObject ? userIdObject.userId : 'unknown_user';
-
-        // Filtrar orderDataList para eliminar el objeto userId
-        const items = orderDataList.filter(item => !item.userId).map(orderData => ({
-            title: orderData.title,
-            unit_price: Number(orderData.price),
-            quantity: Number(orderData.quantity),
-            currency_id: 'ARS',
-        }));
-
-        const preferenceData = {
-            items: items,
-            back_urls: {
-                success: 'https://ecoomerce-api-v7wq.onrender.com/pago-confirmado',
-                failure: 'https://ecoomerce-api-v7wq.onrender.com/pago-denegado',
-                pending: 'https://ecoomerce-api-v7wq.onrender.com/pago-pendiente',
-            },
-            auto_return: 'approved',
-            notification_url: 'https://ecoomerce-api-v7wq.onrender.com/webhook',
-        };
-
-        const preference = new Preference(client);
-        const result = await preference.create({ body: preferenceData, idempotencyKey });
-        console.log('Preferencia creada:', result);
-
-        res.json({
-            id: result.id,
-            userId: userId, // Devolver el userId en la respuesta
-        });
-    } catch (error) {
-        console.error('Error al crear la preferencia:', error);
-        res.status(500).json({
-            error: 'Error al crear la preferencia :(',
-        });
-    }
-});
 
 // Ruta para manejar la creación de preferencias de pago
 app.post('/create_preference', async (req, res) => {
@@ -197,7 +152,55 @@ app.post('/create_preference', async (req, res) => {
 });
 
 
-// Función para crear la orden en tu base de datos
+const preferences = {}; // Objeto en memoria para almacenar las preferencias
+
+// Ruta para manejar la creación de preferencias de pago
+app.post('/create_preference', async (req, res) => {
+  try {
+      const idempotencyKey = req.headers['x-idempotency-key'];
+      const orderDataList = req.body;
+
+      // Extraer el userId de orderDataList
+      const userIdObject = orderDataList.find(item => item.userId);
+      const userId = userIdObject ? userIdObject.userId : 'unknown_user';
+
+      // Filtrar orderDataList para eliminar el objeto userId
+      const items = orderDataList.filter(item => !item.userId).map(orderData => ({
+          title: orderData.title,
+          unit_price: Number(orderData.price),
+          quantity: Number(orderData.quantity),
+          currency_id: 'ARS',
+      }));
+
+      const preferenceData = {
+          items: items,
+          back_urls: {
+              success: 'https://ecoomerce-api-v7wq.onrender.com/pago-confirmado',
+              failure: 'https://ecoomerce-api-v7wq.onrender.com/pago-denegado',
+              pending: 'https://ecoomerce-api-v7wq.onrender.com/pago-pendiente',
+          },
+          auto_return: 'approved',
+          notification_url: 'https://ecoomerce-api-v7wq.onrender.com/webhook',
+      };
+
+      const preference = new Preference(client);
+      const result = await preference.create({ body: preferenceData, idempotencyKey });
+
+      // Guardar userId asociado con preferenceId
+      preferences[result.id] = userId;
+
+      res.json({
+          id: result.id,
+          init_point: result.init_point,
+          userId: userId, // Devolver el userId en la respuesta
+      });
+  } catch (error) {
+      res.status(500).json({
+          error: 'Error al crear la preferencia :(',
+      });
+  }
+});
+
 const createOrder = async (orderData) => {
   try {
     const response = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
@@ -274,8 +277,10 @@ app.post('/webhook', async (req, res) => {
           price: item.unit_price
         }));
 
+        const userId = preferences[orderData.preference_id]; // Obtener userId usando preferenceId
+
         const order = {
-          userId: '6663703d05baaecba088b074', // Obtén esto de los datos del frontend
+          userId: userId,
           preferenceId: orderData.preference_id,
           merchantOrderId: orderData.id,
           status: 'approved', // Orden aprobada
@@ -301,6 +306,8 @@ app.post('/webhook', async (req, res) => {
     res.sendStatus(500);
   }
 });
+
+
 
 
   app.listen(process.env.PORT || 8000, () => {

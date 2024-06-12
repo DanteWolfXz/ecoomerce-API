@@ -4,10 +4,10 @@ const { Schema, model } = mongoose;
 
 const orderSchema = new Schema(
     {
-        userid : { type: String , required: true },
-        products : [
+        userId: { type: String, required: true },
+        products: [
             {
-                productId: {
+                title: {
                     type: String,
                     required: true
                 },
@@ -15,15 +15,23 @@ const orderSchema = new Schema(
                     type: Number,
                     default: 1,
                 },
+                price: {
+                    type: Number,
+                    required: true
+                },
             },
         ], 
-        amount: { type: Number, required: true },
-        address: { type: Object, required: true },
+        totalAmount: { type: Number, required: true },
+        payer: { 
+            email: { type: String, required: true }
+        },
+        preferenceId: { type: String, required: true },
+        merchantOrderId: { type: String, required: true },
         status: { type: String, default: "pendiente" },
-        delivered: { type: Boolean, default: false },
     },
     { timestamps: true }
 );
 
 export default model("Order", orderSchema);
+
 
