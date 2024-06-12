@@ -204,69 +204,100 @@ app.post('/webhook', async (req, res) => {
 
       const body = req.body;
 
-      // Verificar si resourceUrl está presente y es una URL válida
-      if (!body.resource || !body.resource.startsWith('https://')) {
-          console.error('Invalid resource URL:', body.resource);
-          return res.status(400).json({ error: 'Invalid resource URL' });
-      }
+      // Manejar diferentes tipos de notificaciones
+      if (body.topic === 'merchant_order' && body.resource) {
+          const resourceUrl = body.resource;
 
-      const resourceUrl = body.resource;
-
-      // Obtener los detalles del merchant_order desde MercadoPago
-      const response = await fetch(resourceUrl, {
-          method: 'GET',
-          headers: {
-              Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
-          },
-      });
-
-      const data = await response.json();
-
-      // Verifica que la orden haya sido pagada antes de continuar
-      if (data.order_status === 'paid') {
-          const products = data.items.map(item => ({
-              title: item.title,
-              quantity: item.quantity,
-              price: item.unit_price,
-          }));
-
-          const orderData = {
-              userId: data.payer.id || 'unknown_user', // Usar el userId recibido en el webhook
-              preferenceId: data.preference_id,
-              merchantOrderId: data.id,
-              status: data.order_status,
-              totalAmount: data.total_amount,
-              products: products,
-              payer: {
-                  email: data.payer.email
-              }
-          };
-
-          // Guardar la orden en tu base de datos
-          const orderCreationResponse = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
-              method: 'POST',
+          // Obtener los detalles del merchant_order desde MercadoPago
+          const response = await fetch(resourceUrl, {
+              method: 'GET',
               headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: req.headers['authorization'], // Utilizar el accessToken del usuario
+                  Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
               },
-              body: JSON.stringify(orderData),
           });
 
-          if (orderCreationResponse.ok) {
-              res.sendStatus(200);
-          } else {
-              const errorText = await orderCreationResponse.text();
-              res.status(500).json({ error: 'Error al crear la orden.', details: errorText });
+          if (!response.ok) {
+              const errorText = await response.text();
+              console.error('Error fetching merchant order:', errorText);
+              return res.status(500).json({ error: 'Error fetching merchant order.' });
           }
-      } else {
-          // Si la orden no está pagada, responde con un 200 OK para que MercadoPago no reintente la notificación
+
+          const data = await response.json();
+
+          // Verifica que la orden haya sido pagada antes de continuar
+          if (data.order_status === 'paid') {
+              const products = data.items.map(item => ({
+                  title: item.title,
+                  quantity: item.quantity,
+                  price: item.unit_price,
+              }));
+
+              const orderData = {
+                  userId: data.payer.id || 'unknown_user', // Usar el userId recibido en el webhook
+                  preferenceId: data.preference_id,
+                  merchantOrderId: data.id,
+                  status: data.order_status,
+                  totalAmount: data.total_amount,
+                  products: products,
+                  payer: {
+                      email: data.payer.email
+                  }
+              };
+
+              // Guardar la orden en tu base de datos
+              const orderCreationResponse = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: req.headers['authorization'], // Utilizar el accessToken del usuario
+                  },
+                  body: JSON.stringify(orderData),
+              });
+
+              if (orderCreationResponse.ok) {
+                  res.sendStatus(200);
+              } else {
+                  const errorText = await orderCreationResponse.text();
+                  res.status(500).json({ error: 'Error al crear la orden.', details: errorText });
+              }
+          } else {
+              // Si la orden no está pagada, responde con un 200 OK para que MercadoPago no reintente la notificación
+              res.sendStatus(200);
+          }
+      } else if (body.topic === 'payment' && body.resource) {
+          // Aquí puedes agregar lógica específica para manejar notificaciones de pago
+          const resourceUrl = body.resource;
+
+          // Obtener los detalles del pago desde MercadoPago
+          const response = await fetch(resourceUrl, {
+              method: 'GET',
+              headers: {
+                  Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+              },
+          });
+
+          if (!response.ok) {
+              const errorText = await response.text();
+              console.error('Error fetching payment details:', errorText);
+              return res.status(500).json({ error: 'Error fetching payment details.' });
+          }
+
+          const paymentData = await response.json();
+          console.log('Payment data received:', paymentData);
+
+          // Aquí puedes procesar los datos de pago si es necesario
+
           res.sendStatus(200);
+      } else {
+          console.error('Invalid resource URL or unsupported topic:', body.resource, body.topic);
+          res.status(400).json({ error: 'Invalid resource URL or unsupported topic' });
       }
   } catch (error) {
       console.error('Error handling webhook:', error);
       res.sendStatus(500);
   }
 });
+
 
 
 
