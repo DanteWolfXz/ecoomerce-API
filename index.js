@@ -199,6 +199,9 @@ app.post('/create_preference', async (req, res) => {
 // Ruta para manejar el webhook de MercadoPago
 app.post('/webhook', async (req, res) => {
   try {
+      // Log para ver toda la información que llega en el webhook
+      console.log('Webhook data received:', JSON.stringify(req.body, null, 2));
+
       const body = req.body;
 
       // Verificar si resourceUrl está presente y es una URL válida
