@@ -26,6 +26,8 @@
     origin: 'https://ecoomerce-api-v7wq.onrender.com/',
     optionsSuccessStatus: 200,
   };
+  const { obtenerUserIdDesdeToken } = require('./verifyToken');
+  const { createOrder } = require('./order'); 
 
   mongoose
     .connect(process.env.MONGO_URL)
@@ -239,17 +241,25 @@
             quantity: item.quantity
           }));
   
-          const userId = preferences[orderData.preference_id]; // Obtener userId usando preferenceId
+          const preferenceId = orderData.preference_id;
+          const userId = preferences[preferenceId]; // Obtener userId usando preferenceId
           console.log('UserId associated with preferenceId:', userId);
   
           // Verificar si orderData.shipping y orderData.shipping.address existen
           const address = orderData.shipping?.address || {};
   
-          // Obtener el accessToken del usuario
-          const userAccessToken = await getUserAccessToken(userId);
+          // Obtener el accessToken del usuario (supongamos que lo obtienes de algún lado)
+          const userAccessToken = process.env.USER_ACCESS_TOKEN; // Ajusta esto según cómo obtienes el token
+  
           if (!userAccessToken) {
             console.error('Error: No se pudo obtener el accessToken del usuario');
             return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
+          }
+  
+          const tokenUserId = obtenerUserIdDesdeToken(userAccessToken);
+          if (!tokenUserId) {
+            console.error('Error: No se pudo obtener el userId del token');
+            return res.status(500).json({ error: 'No se pudo obtener el userId del token' });
           }
   
           const order = {
@@ -298,17 +308,25 @@
           quantity: item.quantity
         }));
   
-        const userId = preferences[orderData.preference_id]; // Obtener userId usando preferenceId
+        const preferenceId = orderData.preference_id;
+        const userId = preferences[preferenceId]; // Obtener userId usando preferenceId
         console.log('UserId associated with preferenceId:', userId);
   
         // Verificar si orderData.shipping y orderData.shipping.address existen
         const address = orderData.shipping?.address || {};
   
-        // Obtener el accessToken del usuario
-        const userAccessToken = await getUserAccessToken(userId);
+        // Obtener el accessToken del usuario (supongamos que lo obtienes de algún lado)
+        const userAccessToken = process.env.USER_ACCESS_TOKEN; // Ajusta esto según cómo obtienes el token
+  
         if (!userAccessToken) {
           console.error('Error: No se pudo obtener el accessToken del usuario');
           return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
+        }
+  
+        const tokenUserId = obtenerUserIdDesdeToken(userAccessToken);
+        if (!tokenUserId) {
+          console.error('Error: No se pudo obtener el userId del token');
+          return res.status(500).json({ error: 'No se pudo obtener el userId del token' });
         }
   
         const order = {
