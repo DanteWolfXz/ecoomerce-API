@@ -106,10 +106,55 @@
   
 
 
-
   const preferences = {}; // Objeto en memoria para almacenar las preferencias
 
   // Ruta para manejar la creación de preferencias de pago
+  app.post('/create_preference', async (req, res) => {
+    try {
+      const idempotencyKey = req.headers['x-idempotency-key'];
+      const orderDataList = req.body;
+  
+      // Extraer el userId de orderDataList
+      const userIdObject = orderDataList.find(item => item.userId);
+      const userId = userIdObject ? userIdObject.userId : 'unknown_user';
+  
+      // Filtrar orderDataList para eliminar el objeto userId
+      const items = orderDataList.filter(item => !item.userId).map(orderData => ({
+        title: orderData.title,
+        unit_price: Number(orderData.price),
+        quantity: Number(orderData.quantity),
+        currency_id: 'ARS',
+      }));
+  
+      const preferenceData = {
+        items: items,
+        back_urls: {
+          success: 'https://ecoomerce-api-v7wq.onrender.com/pago-confirmado',
+          failure: 'https://ecoomerce-api-v7wq.onrender.com/pago-denegado',
+          pending: 'https://ecoomerce-api-v7wq.onrender.com/pago-pendiente',
+        },
+        auto_return: 'approved',
+        notification_url: 'https://ecoomerce-api-v7wq.onrender.com/webhook',
+      };
+  
+      const preference = new Preference(client);
+      const result = await preference.create({ body: preferenceData, idempotencyKey });
+  
+      // Guardar userId asociado con preferenceId
+      preferences[result.id] = userId;
+  
+      res.json({
+        id: result.id,
+        init_point: result.init_point,
+        userId: userId, // Devolver el userId en la respuesta
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Error al crear la preferencia :(',
+      });
+    }
+  });
+  
   const createOrder = async (orderData) => {
     try {
       console.log('Creating order with data:', orderData);
@@ -152,7 +197,8 @@
         const paymentResponse = await fetch(`https://api.mercadolibre.com/collections/notifications/${paymentId}`, {
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`
+            Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+            'x-meli-user-id': process.env.MERCADOLIBRE_USER_ID // Añadir el User ID aquí si es necesario
           }
         });
   
@@ -174,7 +220,8 @@
           const orderResponse = await fetch(`https://api.mercadolibre.com/merchant_orders/${merchantOrderId}`, {
             method: 'GET',
             headers: {
-              Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`
+              Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+              'x-meli-user-id': process.env.MERCADOLIBRE_USER_ID // Añadir el User ID aquí si es necesario
             }
           });
   
@@ -221,7 +268,8 @@
         const orderResponse = await fetch(`https://api.mercadolibre.com/merchant_orders/${merchantOrderId}`, {
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`
+            Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+            'x-meli-user-id': process.env.MERCADOLIBRE_USER_ID // Añadir el User ID aquí si es necesario
           }
         });
   
@@ -265,6 +313,7 @@
       res.sendStatus(500);
     }
   });
+  
 
 
   app.listen(process.env.PORT || 8000, () => {
