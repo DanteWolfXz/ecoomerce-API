@@ -49,6 +49,16 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
             orderDataList.push({ userId: userId });
         }
 
+        // Obtener el accessToken del usuario desde localStorage o de donde se almacene
+        const userAccessToken = localStorage.getItem('accessToken');
+        if (userAccessToken) {
+            // Agregar el accessToken al objeto orderDataList
+            orderDataList.push({ userAccessToken: userAccessToken });
+        } else {
+            alert("Access token no encontrado");
+            return;
+        }
+
         const response = await fetch("https://ecoomerce-api-v7wq.onrender.com/create_preference", {
             method: "POST",
             headers: {
@@ -64,8 +74,6 @@ document.getElementById('continuar-pago').addEventListener('click', async () => 
         alert("error :(");
     }
 });
-
-
 
 const createCheckoutButton = (preferenceId) => {
     const bricksBuilder = mp.bricks();
@@ -91,4 +99,3 @@ const createCheckoutButton = (preferenceId) => {
 
     renderComponent(); // Llama a la función para renderizar el botón
 }
-

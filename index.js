@@ -69,6 +69,7 @@ const client = new MercadoPagoConfig({
 });
 
 const preferences = {};
+const userTokens = {};
 
 app.post('/create_preference', async (req, res) => {
   try {
@@ -76,8 +77,15 @@ app.post('/create_preference', async (req, res) => {
     const orderDataList = req.body;
     const userIdObject = orderDataList.find(item => item.userId);
     const userId = userIdObject ? userIdObject.userId : 'unknown_user';
+    const userAccessToken = orderDataList.find(item => item.userAccessToken)?.userAccessToken;
 
-    const items = orderDataList.filter(item => !item.userId).map(orderData => ({
+    if (userAccessToken) {
+      userTokens[userId] = userAccessToken;
+    } else {
+      return res.status(400).json({ error: 'Missing user access token' });
+    }
+
+    const items = orderDataList.filter(item => !item.userId && !item.userAccessToken).map(orderData => ({
       title: orderData.title,
       unit_price: Number(orderData.price),
       quantity: Number(orderData.quantity),
@@ -110,14 +118,14 @@ app.post('/create_preference', async (req, res) => {
   }
 });
 
-const createOrder = async (orderData) => {
+const createOrder = async (orderData, userAccessToken) => {
   try {
     console.log('Creating order with data:', orderData);
     const response = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        Authorization: `Bearer ${userAccessToken}`
       },
       body: JSON.stringify(orderData)
     });
@@ -196,17 +204,11 @@ app.post('/webhook', async (req, res) => {
 
         const address = orderData.shipping?.address || {};
 
-        const userAccessToken = process.env.USER_ACCESS_TOKEN;
+        const userAccessToken = userTokens[userId];
 
         if (!userAccessToken) {
           console.error('Error: No se pudo obtener el accessToken del usuario');
           return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
-        }
-
-        const tokenUserId = obtenerUserIdDesdeToken(userAccessToken);
-        if (!tokenUserId) {
-          console.error('Error: No se pudo obtener el userId del token');
-          return res.status(500).json({ error: 'No se pudo obtener el userId del token' });
         }
 
         const order = {
@@ -259,17 +261,11 @@ app.post('/webhook', async (req, res) => {
 
       const address = orderData.shipping?.address || {};
 
-      const userAccessToken = process.env.USER_ACCESS_TOKEN;
+      const userAccessToken = userTokens[userId];
 
       if (!userAccessToken) {
         console.error('Error: No se pudo obtener el accessToken del usuario');
         return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
-      }
-
-      const tokenUserId = obtenerUserIdDesdeToken(userAccessToken);
-      if (!tokenUserId) {
-        console.error('Error: No se pudo obtener el userId del token');
-        return res.status(500).json({ error: 'No se pudo obtener el userId del token' });
       }
 
       const order = {
@@ -295,6 +291,7 @@ app.post('/webhook', async (req, res) => {
     res.sendStatus(500);
   }
 });
+
 
 app.listen(port, () => {
   console.log(`Backend server is running on port ${port}!`);
