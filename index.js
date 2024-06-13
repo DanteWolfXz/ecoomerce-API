@@ -27,7 +27,6 @@
     optionsSuccessStatus: 200,
   };
   const { obtenerUserIdDesdeToken } = require('./verifyToken');
-  const { createOrder } = require('./order'); 
 
   mongoose
     .connect(process.env.MONGO_URL)
