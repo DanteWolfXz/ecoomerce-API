@@ -15,6 +15,7 @@
   import debug from 'debug';
   import bodyParser from 'body-parser';
   import fetch from 'node-fetch';
+  import { obtenerUserIdDesdeToken } from './routes/verifyToken.mjs';
 
   dotenv.config();
 
@@ -26,7 +27,7 @@
     origin: 'https://ecoomerce-api-v7wq.onrender.com/',
     optionsSuccessStatus: 200,
   };
-  const { obtenerUserIdDesdeToken } = require('./verifyToken');
+ 
 
   mongoose
     .connect(process.env.MONGO_URL)
