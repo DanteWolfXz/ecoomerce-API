@@ -77,12 +77,12 @@ app.post('/create_preference', async (req, res) => {
     const orderDataList = req.body;
     const userIdObject = orderDataList.find(item => item.userId);
     const userId = userIdObject ? userIdObject.userId : 'unknown_user';
-    const userAccessToken = orderDataList.find(item => item.userAccessToken)?.userAccessToken;
+    const userAccessTokenObject = orderDataList.find(item => item.userAccessToken);
+    const userAccessToken = userAccessTokenObject ? userAccessTokenObject.userAccessToken : null;
 
-    if (userAccessToken) {
-      userTokens[userId] = userAccessToken;
-    } else {
-      return res.status(400).json({ error: 'Missing user access token' });
+    if (!userAccessToken) {
+      console.error('Error: No se pudo obtener el accessToken del usuario');
+      return res.status(400).json({ error: 'No se pudo obtener el accessToken del usuario' });
     }
 
     const items = orderDataList.filter(item => !item.userId && !item.userAccessToken).map(orderData => ({
@@ -106,7 +106,7 @@ app.post('/create_preference', async (req, res) => {
     const preference = new Preference(client);
     const result = await preference.create({ body: preferenceData, idempotencyKey });
 
-    preferences[result.id] = userId;
+    preferences[result.id] = { userId, userAccessToken };
 
     res.json({
       id: result.id,
@@ -114,6 +114,7 @@ app.post('/create_preference', async (req, res) => {
       userId: userId,
     });
   } catch (error) {
+    console.error('Error al crear la preferencia:', error);
     res.status(500).json({ error: 'Error al crear la preferencia :(' });
   }
 });
@@ -194,17 +195,18 @@ app.post('/webhook', async (req, res) => {
         console.log('Merchant order data received:', orderData);
 
         const products = orderData.items.map(item => ({
-          productName: item.title,
-          quantity: item.quantity
+          title: item.title,
+          quantity: item.quantity,
+          price: item.unit_price
         }));
 
         const preferenceId = orderData.preference_id;
-        const userId = preferences[preferenceId];
+        const userData = preferences[preferenceId];
+        const userId = userData.userId;
+        const userAccessToken = userData.userAccessToken;
         console.log('UserId associated with preferenceId:', userId);
 
         const address = orderData.shipping?.address || {};
-
-        const userAccessToken = userTokens[userId];
 
         if (!userAccessToken) {
           console.error('Error: No se pudo obtener el accessToken del usuario');
@@ -214,10 +216,11 @@ app.post('/webhook', async (req, res) => {
         const order = {
           userId: userId,
           products: products,
-          amount: orderData.total_amount,
-          address: address,
+          totalAmount: orderData.total_amount,
+          payer: { email: paymentData.collection.payer.email },
+          preferenceId: preferenceId,
+          merchantOrderId: merchantOrderId,
           status: 'approved',
-          delivered: false
         };
 
         console.log('Order data to be sent to createOrder:', order);
@@ -251,17 +254,18 @@ app.post('/webhook', async (req, res) => {
       console.log('Merchant order data received:', orderData);
 
       const products = orderData.items.map(item => ({
-        productName: item.title,
-        quantity: item.quantity
+        title: item.title,
+        quantity: item.quantity,
+        price: item.unit_price
       }));
 
       const preferenceId = orderData.preference_id;
-      const userId = preferences[preferenceId];
+      const userData = preferences[preferenceId];
+      const userId = userData.userId;
+      const userAccessToken = userData.userAccessToken;
       console.log('UserId associated with preferenceId:', userId);
 
       const address = orderData.shipping?.address || {};
-
-      const userAccessToken = userTokens[userId];
 
       if (!userAccessToken) {
         console.error('Error: No se pudo obtener el accessToken del usuario');
@@ -271,10 +275,11 @@ app.post('/webhook', async (req, res) => {
       const order = {
         userId: userId,
         products: products,
-        amount: orderData.total_amount,
-        address: address,
+        totalAmount: orderData.total_amount,
+        payer: { email: paymentData.collection.payer.email },
+        preferenceId: preferenceId,
+        merchantOrderId: merchantOrderId,
         status: 'approved',
-        delivered: false
       };
 
       console.log('Order data to be sent to createOrder:', order);
@@ -291,6 +296,7 @@ app.post('/webhook', async (req, res) => {
     res.sendStatus(500);
   }
 });
+
 
 
 app.listen(port, () => {
