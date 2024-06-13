@@ -245,6 +245,13 @@
           // Verificar si orderData.shipping y orderData.shipping.address existen
           const address = orderData.shipping?.address || {};
   
+          // Obtener el accessToken del usuario
+          const userAccessToken = await getUserAccessToken(userId);
+          if (!userAccessToken) {
+            console.error('Error: No se pudo obtener el accessToken del usuario');
+            return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
+          }
+  
           const order = {
             userId: userId,
             products: products,
@@ -256,7 +263,8 @@
   
           console.log('Order data to be sent to createOrder:', order);
   
-          const createdOrder = await createOrder(order);
+          // Crear la orden usando el accessToken del usuario
+          const createdOrder = await createOrder(order, userAccessToken);
           console.log('Order created successfully:', createdOrder);
           res.sendStatus(200);
         } else {
@@ -296,6 +304,13 @@
         // Verificar si orderData.shipping y orderData.shipping.address existen
         const address = orderData.shipping?.address || {};
   
+        // Obtener el accessToken del usuario
+        const userAccessToken = await getUserAccessToken(userId);
+        if (!userAccessToken) {
+          console.error('Error: No se pudo obtener el accessToken del usuario');
+          return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
+        }
+  
         const order = {
           userId: userId,
           products: products,
@@ -307,7 +322,8 @@
   
         console.log('Order data to be sent to createOrder:', order);
   
-        const createdOrder = await createOrder(order);
+        // Crear la orden usando el accessToken del usuario
+        const createdOrder = await createOrder(order, userAccessToken);
         console.log('Order created successfully:', createdOrder);
         res.sendStatus(200);
       } else {
