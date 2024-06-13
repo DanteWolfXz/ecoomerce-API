@@ -242,11 +242,14 @@
           const userId = preferences[orderData.preference_id]; // Obtener userId usando preferenceId
           console.log('UserId associated with preferenceId:', userId);
   
+          // Verificar si orderData.shipping y orderData.shipping.address existen
+          const address = orderData.shipping?.address || {};
+  
           const order = {
             userId: userId,
             products: products,
             amount: orderData.total_amount,
-            address: orderData.shipping.address,
+            address: address, // Asignar la dirección solo si existe
             status: 'approved', // Orden aprobada
             delivered: false // Assuming you want to initialize it as false
           };
@@ -290,11 +293,14 @@
         const userId = preferences[orderData.preference_id]; // Obtener userId usando preferenceId
         console.log('UserId associated with preferenceId:', userId);
   
+        // Verificar si orderData.shipping y orderData.shipping.address existen
+        const address = orderData.shipping?.address || {};
+  
         const order = {
           userId: userId,
           products: products,
           amount: orderData.total_amount,
-          address: orderData.shipping.address,
+          address: address, // Asignar la dirección solo si existe
           status: 'approved', // Orden aprobada
           delivered: false // Assuming you want to initialize it as false
         };
