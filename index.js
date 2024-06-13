@@ -186,7 +186,7 @@
   app.post('/webhook', async (req, res) => {
     try {
       console.log('Webhook data received:', JSON.stringify(req.body, null, 2));
-  
+      
       const body = req.body;
   
       if (body.topic === 'payment' && body.data && body.data.id) {
