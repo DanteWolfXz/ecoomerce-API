@@ -235,7 +235,7 @@
           console.log('Merchant order data received:', orderData);
   
           const products = orderData.items.map(item => ({
-            productId: item.id, // assuming you need productId from order data
+            productName: item.title, // Usar el título del producto en lugar del ID
             quantity: item.quantity
           }));
   
@@ -286,7 +286,7 @@
         console.log('Merchant order data received:', orderData);
   
         const products = orderData.items.map(item => ({
-          productId: item.id, // assuming you need productId from order data
+          productName: item.title, // Usar el título del producto en lugar del ID
           quantity: item.quantity
         }));
   
