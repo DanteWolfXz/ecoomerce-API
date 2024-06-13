@@ -3,16 +3,16 @@ import jwt from 'jsonwebtoken';
 export const verifyToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (authHeader) {
-        const token = authHeader.split(" ")[1];
+        const token = authHeader.split(' ')[1];
         try {
             const user = jwt.verify(token, process.env.JWT_SEC);
             req.user = user;
             next();
         } catch (err) {
-            return res.status(401).json({ error: "Token inválido" });
+            return res.status(401).json({ error: 'Token inválido' });
         }
     } else {
-        return res.status(401).json({ error: "No estás autorizado" });
+        return res.status(401).json({ error: 'No estás autorizado' });
     }
 };
 
@@ -21,7 +21,7 @@ export const verifyTokenAndAuthorization = (req, res, next) => {
         if (req.user.id === req.params.userid || req.user.isAdmin) {
             next();
         } else {
-            res.status(403).json("No estás autorizado a realizar esa acción");
+            res.status(403).json('No estás autorizado a realizar esa acción');
         }
     });
 };
@@ -31,7 +31,7 @@ export const verifyTokenAndAdmin = (req, res, next) => {
         if (req.user.isAdmin) {
             next();
         } else {
-            res.status(403).json("No estás autorizado a realizar esa acción");
+            res.status(403).json('No estás autorizado a realizar esa acción');
         }
     });
 };
@@ -55,3 +55,4 @@ export const obtenerUserIdDesdeToken = (accessToken) => {
         return null;
     }
 };
+
