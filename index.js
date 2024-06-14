@@ -14,7 +14,6 @@ import { MercadoPagoConfig, Preference } from 'mercadopago';
 import debug from 'debug';
 import bodyParser from 'body-parser';
 import fetch from 'node-fetch';
-import { obtenerUserIdDesdeToken } from './routes/verifyToken.mjs';
 
 dotenv.config();
 
@@ -146,73 +145,59 @@ const createOrder = async (orderData, userAccessToken) => {
   }
 };
 
-const express = require('express');
-const fetch = require('node-fetch');
-
-const app = express();
-app.use(express.json());
-
 app.post('/webhook', async (req, res) => {
-    try {
-        const { resource, topic } = req.body;
+  try {
+      const { resource, topic } = req.body;
 
-        if (topic === 'merchant_order') {
-            // Fetch the merchant order details
-            const response = await fetch(resource);
-            const merchantOrder = await response.json();
+      if (topic === 'merchant_order') {
+          // Fetch the merchant order details
+          const response = await fetch(resource);
+          const merchantOrder = await response.json();
 
-            // Process the merchant order data
-            if (merchantOrder.order_status === 'paid') {
-                // Create order logic here
-                const order = {
-                    id: merchantOrder.id,
-                    status: merchantOrder.status,
-                    total_amount: merchantOrder.total_amount,
-                    items: merchantOrder.items.map(item => ({
-                        title: item.title,
-                        quantity: item.quantity,
-                        unit_price: item.unit_price,
-                    })),
-                    payment: merchantOrder.payments.map(payment => ({
-                        id: payment.id,
-                        transaction_amount: payment.transaction_amount,
-                        status: payment.status,
-                        date_approved: payment.date_approved,
-                    })),
-                };
+          // Process the merchant order data
+          if (merchantOrder.order_status === 'paid') {
+              // Create order logic here
+              const order = {
+                  id: merchantOrder.id,
+                  status: merchantOrder.status,
+                  total_amount: merchantOrder.total_amount,
+                  items: merchantOrder.items.map(item => ({
+                      title: item.title,
+                      quantity: item.quantity,
+                      unit_price: item.unit_price,
+                  })),
+                  payment: merchantOrder.payments.map(payment => ({
+                      id: payment.id,
+                      transaction_amount: payment.transaction_amount,
+                      status: payment.status,
+                      date_approved: payment.date_approved,
+                  })),
+              };
 
-                // You can save this order to your database or perform other actions as needed
-                console.log('Order created:', order);
-            } else {
-                console.log('Order not paid yet:', merchantOrder);
-            }
+              // You can save this order to your database or perform other actions as needed
+              console.log('Order created:', order);
+          } else {
+              console.log('Order not paid yet:', merchantOrder);
+          }
 
-        } else if (topic === 'payment') {
-            // Fetch the payment details
-            const response = await fetch(resource);
-            const payment = await response.json();
+      } else if (topic === 'payment') {
+          // Fetch the payment details
+          const response = await fetch(resource);
+          const payment = await response.json();
 
-            // Handle payment details if necessary
-            console.log('Payment received:', payment);
+          // Handle payment details if necessary
+          console.log('Payment received:', payment);
 
-        } else {
-            console.log('Unhandled topic:', topic);
-        }
+      } else {
+          console.log('Unhandled topic:', topic);
+      }
 
-        res.status(200).send('Webhook received and processed successfully.');
-    } catch (error) {
-        console.error('Error handling webhook:', error);
-        res.status(500).send('Error processing webhook.');
-    }
+      res.status(200).send('Webhook received and processed successfully.');
+  } catch (error) {
+      console.error('Error handling webhook:', error);
+      res.status(500).send('Error processing webhook.');
+  }
 });
-
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
-
-
 
 app.listen(port, () => {
   console.log(`Backend server is running on port ${port}!`);
