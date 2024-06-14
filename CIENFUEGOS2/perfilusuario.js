@@ -46,34 +46,40 @@ async function obtenerPedidosUsuario(userId, accessToken) {
         });
 
         if (!ordersResponse.ok) {
-            throw new Error(`HTTP error! Status: ${ordersResponse.status}`);
-        }
-
-        const orders = await ordersResponse.json();
-        console.log("Pedidos del usuario:", orders);
-
-        const orderList = document.getElementById('order-list');
-        orderList.innerHTML = ''; // Limpiar lista actual de pedidos
-
-        if (orders.length === 0) {
-            const listItem = document.createElement('li');
-            listItem.textContent = 'No hay pedidos disponibles';
-            orderList.appendChild(listItem);
+            if (ordersResponse.status === 404) {
+                console.error('No se encontraron pedidos para el usuario.');
+                const orderList = document.getElementById('order-list');
+                orderList.innerHTML = `<li>No se encontraron pedidos para el usuario.</li>`;
+            } else {
+                throw new Error(`HTTP error! Status: ${ordersResponse.status}`);
+            }
         } else {
-            orders.forEach(order => {
-                const listItem = document.createElement('li');
-                const statusClass = getStatusClass(order.status);
+            const orders = await ordersResponse.json();
+            console.log("Pedidos del usuario:", orders);
 
-                listItem.innerHTML = `
-                    <div>
-                        <strong>ID del Pedido:</strong> ${order._id}<br>
-                        <strong>Productos:</strong> ${order.products.map(product => product.productId).join(', ')}<br>
-                        <strong>Monto:</strong> ${order.amount}<br>
-                        <strong>Estado:</strong> <span class="${statusClass}">${order.status}</span>
-                    </div>
-                `;
+            const orderList = document.getElementById('order-list');
+            orderList.innerHTML = ''; // Limpiar lista actual de pedidos
+
+            if (orders.length === 0) {
+                const listItem = document.createElement('li');
+                listItem.textContent = 'No hay pedidos disponibles';
                 orderList.appendChild(listItem);
-            });
+            } else {
+                orders.forEach(order => {
+                    const listItem = document.createElement('li');
+                    const statusClass = getStatusClass(order.status);
+
+                    listItem.innerHTML = `
+                        <div>
+                            <strong>ID del Pedido:</strong> ${order._id}<br>
+                            <strong>Productos:</strong> ${order.products.map(product => product.productId).join(', ')}<br>
+                            <strong>Monto:</strong> ${order.amount}<br>
+                            <strong>Estado:</strong> <span class="${statusClass}">${order.status}</span>
+                        </div>
+                    `;
+                    orderList.appendChild(listItem);
+                });
+            }
         }
     } catch (error) {
         console.error('Error al obtener los pedidos del usuario:', error);
@@ -82,7 +88,6 @@ async function obtenerPedidosUsuario(userId, accessToken) {
         orderList.innerHTML = `<li>Error al obtener los pedidos del usuario</li>`;
     }
 }
-
 
 function getStatusClass(status) {
     switch (status.toLowerCase()) {
