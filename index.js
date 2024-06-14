@@ -174,7 +174,7 @@ app.post('/webhook', async (req, res) => {
             const paymentData = await paymentResponse.json();
             console.log('Payment data received:', paymentData);
 
-            if (paymentData.collection.status === 'approved') {
+            if (paymentData.collection.status === 'approved' && paymentData.collection.status_detail === 'accredited') {
                 const merchantOrderId = paymentData.collection.merchant_order_id;
                 console.log('Fetching merchant order details for merchantOrderId:', merchantOrderId);
 
@@ -207,8 +207,6 @@ app.post('/webhook', async (req, res) => {
                 const userAccessToken = userData.userAccessToken;
                 console.log('UserId associated with preferenceId:', userId);
 
-                const address = orderData.shipping?.address || {};
-
                 if (!userAccessToken) {
                     console.error('Error: No se pudo obtener el accessToken del usuario');
                     return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
@@ -230,7 +228,7 @@ app.post('/webhook', async (req, res) => {
                 console.log('Order created successfully:', createdOrder);
                 res.sendStatus(200);
             } else {
-                console.log('Payment status not approved:', paymentData.collection.status);
+                console.log('Payment status not approved or accredited:', paymentData.collection.status, paymentData.collection.status_detail);
                 res.sendStatus(200);
             }
         } else if (body.topic === 'merchant_order' && body.resource) {
@@ -266,8 +264,6 @@ app.post('/webhook', async (req, res) => {
             const userAccessToken = userData.userAccessToken;
             console.log('UserId associated with preferenceId:', userId);
 
-            const address = orderData.shipping?.address || {};
-
             if (!userAccessToken) {
                 console.error('Error: No se pudo obtener el accessToken del usuario');
                 return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
@@ -277,7 +273,7 @@ app.post('/webhook', async (req, res) => {
                 userId: userId,
                 products: products,
                 totalAmount: orderData.total_amount,
-                payer: { email: paymentData.collection.payer.email },
+                payer: { email: orderData.payer.email },
                 preferenceId: preferenceId,
                 merchantOrderId: merchantOrderId,
                 status: 'approved',
