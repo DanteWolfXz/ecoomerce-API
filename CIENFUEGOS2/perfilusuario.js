@@ -45,42 +45,44 @@ async function obtenerPedidosUsuario(userId, accessToken) {
             }
         });
 
-        if (ordersResponse.ok) {
-            const orders = await ordersResponse.json();
-            console.log("Pedidos del usuario:", orders);
+        if (!ordersResponse.ok) {
+            throw new Error(`HTTP error! Status: ${ordersResponse.status}`);
+        }
 
-            const orderList = document.getElementById('order-list');
-            orderList.innerHTML = ''; // Limpiar lista actual de pedidos
+        const orders = await ordersResponse.json();
+        console.log("Pedidos del usuario:", orders);
 
-            if (orders.length === 0) {
-                const listItem = document.createElement('li');
-                listItem.textContent = 'No hay pedidos disponibles';
-                orderList.appendChild(listItem);
-            } else {
-                orders.forEach(order => {
-                    const listItem = document.createElement('li');
-                    const statusClass = getStatusClass(order.status);
+        const orderList = document.getElementById('order-list');
+        orderList.innerHTML = ''; // Limpiar lista actual de pedidos
 
-                    listItem.innerHTML = `
-                        <div>
-                            <strong>ID del Pedido:</strong> ${order._id}<br>
-                            <strong>Productos:</strong> ${order.products.map(product => product.title).join(', ')}<br>
-                            <strong>Monto:</strong> ${order.totalAmount}<br>
-                            <strong>Estado:</strong> <span class="${statusClass}">${order.status}</span>
-                        </div>
-                    `;
-                    orderList.appendChild(listItem);
-                });
-            }
+        if (orders.length === 0) {
+            const listItem = document.createElement('li');
+            listItem.textContent = 'No hay pedidos disponibles';
+            orderList.appendChild(listItem);
         } else {
-            console.error('Error al obtener los pedidos del usuario:', ordersResponse.statusText);
-            // Aquí podrías mostrar un mensaje de error al usuario
+            orders.forEach(order => {
+                const listItem = document.createElement('li');
+                const statusClass = getStatusClass(order.status);
+
+                listItem.innerHTML = `
+                    <div>
+                        <strong>ID del Pedido:</strong> ${order._id}<br>
+                        <strong>Productos:</strong> ${order.products.map(product => product.productId).join(', ')}<br>
+                        <strong>Monto:</strong> ${order.amount}<br>
+                        <strong>Estado:</strong> <span class="${statusClass}">${order.status}</span>
+                    </div>
+                `;
+                orderList.appendChild(listItem);
+            });
         }
     } catch (error) {
         console.error('Error al obtener los pedidos del usuario:', error);
-        // Aquí podrías mostrar un mensaje de error al usuario
+        // Mostrar mensaje de error al usuario en la interfaz
+        const orderList = document.getElementById('order-list');
+        orderList.innerHTML = `<li>Error al obtener los pedidos del usuario</li>`;
     }
 }
+
 
 function getStatusClass(status) {
     switch (status.toLowerCase()) {
