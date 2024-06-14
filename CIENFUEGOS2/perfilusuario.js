@@ -29,9 +29,11 @@ async function obtenerPerfilUsuario(userId, accessToken) {
             document.getElementById('phone').textContent = user.phone;
         } else {
             console.error('Error al obtener los datos del usuario:', profileResponse.statusText);
+            // Aquí podrías mostrar un mensaje de error al usuario
         }
     } catch (error) {
         console.error('Error al obtener los datos del usuario:', error);
+        // Aquí podrías mostrar un mensaje de error al usuario
     }
 }
 
@@ -62,8 +64,8 @@ async function obtenerPedidosUsuario(userId, accessToken) {
                     listItem.innerHTML = `
                         <div>
                             <strong>ID del Pedido:</strong> ${order._id}<br>
-                            <strong>Productos:</strong> ${order.products.map(product => product.productId).join(', ')}<br>
-                            <strong>Monto:</strong> ${order.amount}<br>
+                            <strong>Productos:</strong> ${order.products.map(product => product.title).join(', ')}<br>
+                            <strong>Monto:</strong> ${order.totalAmount}<br>
                             <strong>Estado:</strong> <span class="${statusClass}">${order.status}</span>
                         </div>
                     `;
@@ -72,9 +74,11 @@ async function obtenerPedidosUsuario(userId, accessToken) {
             }
         } else {
             console.error('Error al obtener los pedidos del usuario:', ordersResponse.statusText);
+            // Aquí podrías mostrar un mensaje de error al usuario
         }
     } catch (error) {
         console.error('Error al obtener los pedidos del usuario:', error);
+        // Aquí podrías mostrar un mensaje de error al usuario
     }
 }
 
