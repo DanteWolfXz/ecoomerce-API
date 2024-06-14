@@ -73,8 +73,8 @@ async function obtenerPedidosUsuario(userId, accessToken) {
                     listItem.innerHTML = `
                         <div>
                             <strong>ID del Pedido:</strong> ${order._id}<br>
-                            <strong>Productos:</strong> ${order.products.map(product => product.productId).join(', ')}<br>
-                            <strong>Monto:</strong> ${order.amount}<br>
+                            <strong>Productos:</strong> ${order.products.map(product => product.title).join(', ')}<br>
+                            <strong>Monto:</strong> ${order.totalAmount}<br>
                             <strong>Estado:</strong> <span class="${statusClass}">${order.status}</span>
                         </div>
                     `;
