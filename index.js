@@ -14,6 +14,7 @@ import { MercadoPagoConfig, Preference } from 'mercadopago';
 import debug from 'debug';
 import bodyParser from 'body-parser';
 import fetch from 'node-fetch';
+import { obtenerUserIdDesdeToken } from './routes/verifyToken.mjs';
 
 dotenv.config();
 
@@ -67,137 +68,242 @@ const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
 });
 
+const ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
+const USER_ID = process.env.MERCADOLIBRE_USER_ID;
 const preferences = {};
-const userTokens = {};
 
 app.post('/create_preference', async (req, res) => {
-  try {
-    const idempotencyKey = req.headers['x-idempotency-key'];
-    const orderDataList = req.body;
-    const userIdObject = orderDataList.find(item => item.userId);
-    const userId = userIdObject ? userIdObject.userId : 'unknown_user';
-    const userAccessTokenObject = orderDataList.find(item => item.userAccessToken);
-    const userAccessToken = userAccessTokenObject ? userAccessTokenObject.userAccessToken : null;
+    try {
+        const idempotencyKey = req.headers['x-idempotency-key'];
+        const orderDataList = req.body;
+        const userIdObject = orderDataList.find(item => item.userId);
+        const userId = userIdObject ? userIdObject.userId : 'unknown_user';
+        const userAccessTokenObject = orderDataList.find(item => item.userAccessToken);
+        const userAccessToken = userAccessTokenObject ? userAccessTokenObject.userAccessToken : null;
 
-    if (!userAccessToken) {
-      console.error('Error: No se pudo obtener el accessToken del usuario');
-      return res.status(400).json({ error: 'No se pudo obtener el accessToken del usuario' });
+        if (!userAccessToken) {
+            console.error('Error: No se pudo obtener el accessToken del usuario');
+            return res.status(400).json({ error: 'No se pudo obtener el accessToken del usuario' });
+        }
+
+        const items = orderDataList.filter(item => !item.userId && !item.userAccessToken).map(orderData => ({
+            title: orderData.title,
+            unit_price: Number(orderData.price),
+            quantity: Number(orderData.quantity),
+            currency_id: 'ARS',
+        }));
+
+        const preferenceData = {
+            items: items,
+            back_urls: {
+                success: 'https://ecoomerce-api-v7wq.onrender.com/pago-confirmado',
+                failure: 'https://ecoomerce-api-v7wq.onrender.com/pago-denegado',
+                pending: 'https://ecoomerce-api-v7wq.onrender.com/pago-pendiente',
+            },
+            auto_return: 'approved',
+            notification_url: 'https://ecoomerce-api-v7wq.onrender.com/webhook',
+        };
+
+        const preference = new Preference(client);
+        const result = await preference.create({ body: preferenceData, idempotencyKey });
+
+        preferences[result.id] = { userId, userAccessToken };
+
+        res.json({
+            id: result.id,
+            init_point: result.init_point,
+            userId: userId,
+        });
+    } catch (error) {
+        console.error('Error al crear la preferencia:', error);
+        res.status(500).json({ error: 'Error al crear la preferencia :(' });
     }
-
-    const items = orderDataList.filter(item => !item.userId && !item.userAccessToken).map(orderData => ({
-      title: orderData.title,
-      unit_price: Number(orderData.price),
-      quantity: Number(orderData.quantity),
-      currency_id: 'ARS',
-    }));
-
-    const preferenceData = {
-      items: items,
-      back_urls: {
-        success: 'https://ecoomerce-api-v7wq.onrender.com/pago-confirmado',
-        failure: 'https://ecoomerce-api-v7wq.onrender.com/pago-denegado',
-        pending: 'https://ecoomerce-api-v7wq.onrender.com/pago-pendiente',
-      },
-      auto_return: 'approved',
-      notification_url: 'https://ecoomerce-api-v7wq.onrender.com/webhook',
-    };
-
-    const preference = new Preference(client);
-    const result = await preference.create({ body: preferenceData, idempotencyKey });
-
-    preferences[result.id] = { userId, userAccessToken };
-
-    res.json({
-      id: result.id,
-      init_point: result.init_point,
-      userId: userId,
-    });
-  } catch (error) {
-    console.error('Error al crear la preferencia:', error);
-    res.status(500).json({ error: 'Error al crear la preferencia :(' });
-  }
 });
 
 const createOrder = async (orderData, userAccessToken) => {
-  try {
-    console.log('Creating order with data:', orderData);
-    const response = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userAccessToken}`
-      },
-      body: JSON.stringify(orderData)
-    });
+    try {
+        console.log('Creating order with data:', orderData);
+        const response = await fetch('https://ecoomerce-api-v7wq.onrender.com/api/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userAccessToken}`
+            },
+            body: JSON.stringify(orderData)
+        });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error creating order:', errorText);
-      throw new Error('Error creating order');
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error creating order:', errorText);
+            throw new Error('Error creating order');
+        }
+
+        const createdOrder = await response.json();
+        console.log('Order created successfully in the database:', createdOrder);
+        return createdOrder;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
     }
-
-    const createdOrder = await response.json();
-    console.log('Order created successfully in the database:', createdOrder);
-    return createdOrder;
-  } catch (error) {
-    console.error('Error:', error);
-    throw error;
-  }
 };
 
 app.post('/webhook', async (req, res) => {
-  try {
-      const { resource, topic } = req.body;
+    try {
+        console.log('Webhook data received:', JSON.stringify(req.body, null, 2));
 
-      if (topic === 'merchant_order') {
-          // Fetch the merchant order details
-          const response = await fetch(resource);
-          const merchantOrder = await response.json();
+        const body = req.body;
 
-          // Process the merchant order data
-          if (merchantOrder.order_status === 'paid') {
-              // Create order logic here
-              const order = {
-                  id: merchantOrder.id,
-                  status: merchantOrder.status,
-                  total_amount: merchantOrder.total_amount,
-                  items: merchantOrder.items.map(item => ({
-                      title: item.title,
-                      quantity: item.quantity,
-                      unit_price: item.unit_price,
-                  })),
-                  payment: merchantOrder.payments.map(payment => ({
-                      id: payment.id,
-                      transaction_amount: payment.transaction_amount,
-                      status: payment.status,
-                      date_approved: payment.date_approved,
-                  })),
-              };
+        if (body.topic === 'payment' && body.data && body.data.id) {
+            const paymentId = body.data.id;
+            console.log('Fetching payment details for paymentId:', paymentId);
 
-              // You can save this order to your database or perform other actions as needed
-              console.log('Order created:', order);
-          } else {
-              console.log('Order not paid yet:', merchantOrder);
-          }
+            const paymentResponse = await fetch(`https://api.mercadolibre.com/collections/notifications/${paymentId}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${ACCESS_TOKEN}`,
+                    'x-meli-user-id': USER_ID
+                }
+            });
 
-      } else if (topic === 'payment') {
-          // Fetch the payment details
-          const response = await fetch(resource);
-          const payment = await response.json();
+            if (!paymentResponse.ok) {
+                const errorText = await paymentResponse.text();
+                console.error('Error fetching payment details:', errorText);
+                return res.status(500).json({ error: 'Error fetching payment details.' });
+            }
 
-          // Handle payment details if necessary
-          console.log('Payment received:', payment);
+            const paymentData = await paymentResponse.json();
+            console.log('Payment data received:', paymentData);
 
-      } else {
-          console.log('Unhandled topic:', topic);
-      }
+            if (paymentData.collection.status === 'approved') {
+                const merchantOrderId = paymentData.collection.merchant_order_id;
+                console.log('Fetching merchant order details for merchantOrderId:', merchantOrderId);
 
-      res.status(200).send('Webhook received and processed successfully.');
-  } catch (error) {
-      console.error('Error handling webhook:', error);
-      res.status(500).send('Error processing webhook.');
-  }
+                const orderResponse = await fetch(`https://api.mercadolibre.com/merchant_orders/${merchantOrderId}`, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${ACCESS_TOKEN}`,
+                        'x-meli-user-id': USER_ID
+                    }
+                });
+
+                if (!orderResponse.ok) {
+                    const errorText = await orderResponse.text();
+                    console.error('Error fetching merchant order:', errorText);
+                    return res.status(500).json({ error: 'Error fetching merchant order.' });
+                }
+
+                const orderData = await orderResponse.json();
+                console.log('Merchant order data received:', orderData);
+
+                const products = orderData.items.map(item => ({
+                    title: item.title,
+                    quantity: item.quantity,
+                    price: item.unit_price
+                }));
+
+                const preferenceId = orderData.preference_id;
+                const userData = preferences[preferenceId];
+                const userId = userData.userId;
+                const userAccessToken = userData.userAccessToken;
+                console.log('UserId associated with preferenceId:', userId);
+
+                const address = orderData.shipping?.address || {};
+
+                if (!userAccessToken) {
+                    console.error('Error: No se pudo obtener el accessToken del usuario');
+                    return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
+                }
+
+                const order = {
+                    userId: userId,
+                    products: products,
+                    totalAmount: orderData.total_amount,
+                    payer: { email: paymentData.collection.payer.email },
+                    preferenceId: preferenceId,
+                    merchantOrderId: merchantOrderId,
+                    status: 'approved',
+                };
+
+                console.log('Order data to be sent to createOrder:', order);
+
+                const createdOrder = await createOrder(order, userAccessToken);
+                console.log('Order created successfully:', createdOrder);
+                res.sendStatus(200);
+            } else {
+                console.log('Payment status not approved:', paymentData.collection.status);
+                res.sendStatus(200);
+            }
+        } else if (body.topic === 'merchant_order' && body.resource) {
+            const merchantOrderId = body.resource.split('/').pop();
+            console.log('Fetching merchant order details for merchantOrderId:', merchantOrderId);
+
+            const orderResponse = await fetch(`https://api.mercadolibre.com/merchant_orders/${merchantOrderId}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${ACCESS_TOKEN}`,
+                    'x-meli-user-id': USER_ID
+                }
+            });
+
+            if (!orderResponse.ok) {
+                const errorText = await orderResponse.text();
+                console.error('Error fetching merchant order:', errorText);
+                return res.status(500).json({ error: 'Error fetching merchant order.' });
+            }
+
+            const orderData = await orderResponse.json();
+            console.log('Merchant order data received:', orderData);
+
+            const products = orderData.items.map(item => ({
+                title: item.title,
+                quantity: item.quantity,
+                price: item.unit_price
+            }));
+
+            const preferenceId = orderData.preference_id;
+            const userData = preferences[preferenceId];
+            const userId = userData.userId;
+            const userAccessToken = userData.userAccessToken;
+            console.log('UserId associated with preferenceId:', userId);
+
+            const address = orderData.shipping?.address || {};
+
+            if (!userAccessToken) {
+                console.error('Error: No se pudo obtener el accessToken del usuario');
+                return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
+            }
+
+            const order = {
+                userId: userId,
+                products: products,
+                totalAmount: orderData.total_amount,
+                payer: { email: paymentData.collection.payer.email },
+                preferenceId: preferenceId,
+                merchantOrderId: merchantOrderId,
+                status: 'approved',
+            };
+
+            console.log('Order data to be sent to createOrder:', order);
+
+            const createdOrder = await createOrder(order, userAccessToken);
+            console.log('Order created successfully:', createdOrder);
+            res.sendStatus(200);
+        } else {
+            console.error('Invalid resource URL or unsupported topic:', body.resource, body.topic);
+            res.status(400).json({ error: 'Invalid resource URL or unsupported topic' });
+        }
+    } catch (error) {
+        console.error('Error handling webhook:', error);
+        res.sendStatus(500);
+    }
 });
+
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+
 
 app.listen(port, () => {
   console.log(`Backend server is running on port ${port}!`);
