@@ -7,20 +7,26 @@ export const verifyToken = (req, res, next) => {
         try {
             const user = jwt.verify(token, process.env.JWT_SEC);
             req.user = user;
+            console.log('Token verificado, usuario:', user); // Añadido para depuración
             next();
         } catch (err) {
+            console.error('Error al verificar el token:', err); // Añadido para depuración
             return res.status(401).json({ error: 'Token inválido' });
         }
     } else {
+        console.error('No se encontró el encabezado de autorización'); // Añadido para depuración
         return res.status(401).json({ error: 'No estás autorizado' });
     }
 };
 
 export const verifyTokenAndAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
-        if (req.user.id === req.params.userid || req.user.isAdmin) {
+        console.log('Verificación de token y autorización, usuario:', req.user); // Añadido para depuración
+        console.log('User ID en la solicitud:', req.params.userId); // Añadido para depuración
+        if (req.user.id === req.params.userId || req.user.isAdmin) {
             next();
         } else {
+            console.error('Usuario no autorizado para esta acción'); // Añadido para depuración
             res.status(403).json('No estás autorizado a realizar esa acción');
         }
     });
@@ -38,19 +44,13 @@ export const verifyTokenAndAdmin = (req, res, next) => {
 
 export const obtenerUserIdDesdeToken = (accessToken) => {
     try {
-        // Decodifica el token de acceso para obtener los datos del usuario
         const decodedToken = jwt.decode(accessToken);
-
-        // Verifica si el token es válido y contiene el campo 'id' con el userId
         if (decodedToken && decodedToken.id) {
-            // Devuelve el userId extraído del token
             return decodedToken.id;
         } else {
-            // Si el token no es válido o no contiene el campo 'id', devuelve null
             return null;
         }
     } catch (error) {
-        // Maneja cualquier error que pueda ocurrir durante el proceso de decodificación
         console.error('Error al decodificar el token:', error);
         return null;
     }

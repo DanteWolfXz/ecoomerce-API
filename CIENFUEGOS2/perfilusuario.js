@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    console.log('User ID:', userId); // Añadido para depuración
+    console.log('Access Token:', accessToken); // Añadido para depuración
+
     await obtenerPerfilUsuario(userId, accessToken);
     await obtenerPedidosUsuario(userId, accessToken);
 });
@@ -29,11 +32,9 @@ async function obtenerPerfilUsuario(userId, accessToken) {
             document.getElementById('phone').textContent = user.phone;
         } else {
             console.error('Error al obtener los datos del usuario:', profileResponse.statusText);
-            // Aquí podrías mostrar un mensaje de error al usuario
         }
     } catch (error) {
         console.error('Error al obtener los datos del usuario:', error);
-        // Aquí podrías mostrar un mensaje de error al usuario
     }
 }
 
@@ -83,7 +84,6 @@ async function obtenerPedidosUsuario(userId, accessToken) {
         }
     } catch (error) {
         console.error('Error al obtener los pedidos del usuario:', error);
-        // Mostrar mensaje de error al usuario en la interfaz
         const orderList = document.getElementById('order-list');
         orderList.innerHTML = `<li>Error al obtener los pedidos del usuario</li>`;
     }
