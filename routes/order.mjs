@@ -41,9 +41,9 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
 });
 
 // GET USER ORDERS
-router.get("/find/:userid", verifyTokenAndAuthorization, async (req, res) => {
+router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) => {
     try {
-        const orders = await Order.find({ userid: req.params.userid });
+        const orders = await Order.find({ userId: req.params.userId });
         if (!orders || orders.length === 0) {
             return res.status(404).json({ message: "No se encontraron pedidos" });
         }
