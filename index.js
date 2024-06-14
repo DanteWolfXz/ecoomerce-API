@@ -148,152 +148,55 @@ const createOrder = async (orderData, userAccessToken) => {
 
 app.post('/webhook', async (req, res) => {
   try {
-    console.log('Webhook data received:', JSON.stringify(req.body, null, 2));
+      const { resource, topic } = req.body;
 
-    const body = req.body;
+      if (topic === 'merchant_order') {
+          // Fetch the merchant order details
+          const response = await axios.get(resource);
+          const merchantOrder = response.data;
 
-    if (body.topic === 'payment' && body.data && body.data.id) {
-      const paymentId = body.data.id;
-      console.log('Fetching payment details for paymentId:', paymentId);
+          // Process the merchant order data
+          if (merchantOrder.order_status === 'paid') {
+              // Create order logic here
+              const order = {
+                  id: merchantOrder.id,
+                  status: merchantOrder.status,
+                  total_amount: merchantOrder.total_amount,
+                  items: merchantOrder.items.map(item => ({
+                      title: item.title,
+                      quantity: item.quantity,
+                      unit_price: item.unit_price,
+                  })),
+                  payment: merchantOrder.payments.map(payment => ({
+                      id: payment.id,
+                      transaction_amount: payment.transaction_amount,
+                      status: payment.status,
+                      date_approved: payment.date_approved,
+                  })),
+              };
 
-      const paymentResponse = await fetch(`https://api.mercadolibre.com/collections/notifications/${paymentId}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
-          'x-meli-user-id': process.env.MERCADOLIBRE_USER_ID
-        }
-      });
-
-      if (!paymentResponse.ok) {
-        const errorText = await paymentResponse.text();
-        console.error('Error fetching payment details:', errorText);
-        return res.status(500).json({ error: 'Error fetching payment details.' });
-      }
-
-      const paymentData = await paymentResponse.json();
-      console.log('Payment data received:', paymentData);
-
-      if (paymentData.collection.status === 'approved') {
-        const merchantOrderId = paymentData.collection.merchant_order_id;
-        console.log('Fetching merchant order details for merchantOrderId:', merchantOrderId);
-
-        const orderResponse = await fetch(`https://api.mercadolibre.com/merchant_orders/${merchantOrderId}`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
-            'x-meli-user-id': process.env.MERCADOLIBRE_USER_ID
+              // You can save this order to your database or perform other actions as needed
+              console.log('Order created:', order);
+          } else {
+              console.log('Order not paid yet:', merchantOrder);
           }
-        });
 
-        if (!orderResponse.ok) {
-          const errorText = await orderResponse.text();
-          console.error('Error fetching merchant order:', errorText);
-          return res.status(500).json({ error: 'Error fetching merchant order.' });
-        }
+      } else if (topic === 'payment') {
+          // Fetch the payment details
+          const response = await axios.get(resource);
+          const payment = response.data;
 
-        const orderData = await orderResponse.json();
-        console.log('Merchant order data received:', orderData);
+          // Handle payment details if necessary
+          console.log('Payment received:', payment);
 
-        const products = orderData.items.map(item => ({
-          title: item.title,
-          quantity: item.quantity,
-          price: item.unit_price
-        }));
-
-        const preferenceId = orderData.preference_id;
-        const userData = preferences[preferenceId];
-        const userId = userData.userId;
-        const userAccessToken = userData.userAccessToken;
-        console.log('UserId associated with preferenceId:', userId);
-
-        const address = orderData.shipping?.address || {};
-
-        if (!userAccessToken) {
-          console.error('Error: No se pudo obtener el accessToken del usuario');
-          return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
-        }
-
-        const order = {
-          userId: userId,
-          products: products,
-          totalAmount: orderData.total_amount,
-          payer: { email: paymentData.collection.payer.email },
-          preferenceId: preferenceId,
-          merchantOrderId: merchantOrderId,
-          status: 'approved',
-        };
-
-        console.log('Order data to be sent to createOrder:', order);
-
-        const createdOrder = await createOrder(order, userAccessToken);
-        console.log('Order created successfully:', createdOrder);
-        res.sendStatus(200);
       } else {
-        console.log('Payment status not approved:', paymentData.collection.status);
-        res.sendStatus(200);
-      }
-    } else if (body.topic === 'merchant_order' && body.resource) {
-      const merchantOrderId = body.resource.split('/').pop();
-      console.log('Fetching merchant order details for merchantOrderId:', merchantOrderId);
-
-      const orderResponse = await fetch(`https://api.mercadolibre.com/merchant_orders/${merchantOrderId}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
-          'x-meli-user-id': process.env.MERCADOLIBRE_USER_ID
-        }
-      });
-
-      if (!orderResponse.ok) {
-        const errorText = await orderResponse.text();
-        console.error('Error fetching merchant order:', errorText);
-        return res.status(500).json({ error: 'Error fetching merchant order.' });
+          console.log('Unhandled topic:', topic);
       }
 
-      const orderData = await orderResponse.json();
-      console.log('Merchant order data received:', orderData);
-
-      const products = orderData.items.map(item => ({
-        title: item.title,
-        quantity: item.quantity,
-        price: item.unit_price
-      }));
-
-      const preferenceId = orderData.preference_id;
-      const userData = preferences[preferenceId];
-      const userId = userData.userId;
-      const userAccessToken = userData.userAccessToken;
-      console.log('UserId associated with preferenceId:', userId);
-
-      const address = orderData.shipping?.address || {};
-
-      if (!userAccessToken) {
-        console.error('Error: No se pudo obtener el accessToken del usuario');
-        return res.status(500).json({ error: 'No se pudo obtener el accessToken del usuario' });
-      }
-
-      const order = {
-        userId: userId,
-        products: products,
-        totalAmount: orderData.total_amount,
-        payer: { email: paymentData.collection.payer.email },
-        preferenceId: preferenceId,
-        merchantOrderId: merchantOrderId,
-        status: 'approved',
-      };
-
-      console.log('Order data to be sent to createOrder:', order);
-
-      const createdOrder = await createOrder(order, userAccessToken);
-      console.log('Order created successfully:', createdOrder);
-      res.sendStatus(200);
-    } else {
-      console.error('Invalid resource URL or unsupported topic:', body.resource, body.topic);
-      res.status(400).json({ error: 'Invalid resource URL or unsupported topic' });
-    }
+      res.status(200).send('Webhook received and processed successfully.');
   } catch (error) {
-    console.error('Error handling webhook:', error);
-    res.sendStatus(500);
+      console.error('Error handling webhook:', error);
+      res.status(500).send('Error processing webhook.');
   }
 });
 
