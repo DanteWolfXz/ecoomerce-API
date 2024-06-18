@@ -120,6 +120,58 @@
     </footer>
 
 
+    <script>
+function handleKeyPress(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); 
+        document.getElementById("loginButton").click();
+    }
+}
+
+
+document.querySelectorAll("input").forEach(input => {
+    input.addEventListener("keypress", handleKeyPress);
+});
+
+
+document.getElementById("loginButton").addEventListener("click", function() {
+    const username = document.querySelector("input[name='username']").value;
+    const password = document.querySelector("input[name='password']").value;
+
+    fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Credenciales incorrectas");
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Almacena el token de acceso en el localStorage
+        localStorage.setItem("accessToken", data.accessToken);
+        
+        localStorage.setItem("userId", data.userId);
+        
+        // Redirige a otra página
+        window.location.href = "/shop";
+    })
+    .catch(error => {
+        // Maneja cualquier error que ocurra durante la solicitud
+        console.error(error);
+    });
+});
+
+      </script>
+
+
 <script src="ordenes.js"></script>
 
 
