@@ -28,6 +28,7 @@ const orderSchema = new Schema(
         preferenceId: { type: String, required: true },
         merchantOrderId: { type: String, required: true },
         status: { type: String, default: "pendiente" },
+        deliveryDate: { type: Date }, 
     },
     { timestamps: true }
 );
