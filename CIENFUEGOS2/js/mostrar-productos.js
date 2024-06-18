@@ -12,6 +12,8 @@ function cargarProductosDesdeServidor() {
         .then(productos => {
             mostrarProductos(productos, 'recomendado', 'recomendados-container');
             mostrarProductos(productos, 'cotillon', 'cotillon-container');
+            // Agregar event listeners a los botones "Añadir al carrito" después de que se hayan generado
+            agregarEventListenersCarrito();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -46,8 +48,9 @@ function mostrarProductos(productos, categoria, containerId) {
 
         contenedor.appendChild(nuevoProducto);
     });
+}
 
-    // Agregar event listener a los botones "Añadir al carrito" después de que se hayan generado
+function agregarEventListenersCarrito() {
     const addToCartButtons = document.querySelectorAll('.add-to-cart');
 
     addToCartButtons.forEach(button => {
