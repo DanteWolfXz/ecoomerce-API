@@ -91,11 +91,11 @@ async function obtenerPedidosUsuario(userId, accessToken) {
 
 function getStatusClass(status) {
     switch (status.toLowerCase()) {
-        case 'entregado':
+        case 'Entregado':
             return 'status-entregado';
-        case 'pendiente':
+        case 'approved':
             return 'status-pendiente';
-        case 'cancelado':
+        case 'Cancelado':
             return 'status-cancelado';
         default:
             return '';
