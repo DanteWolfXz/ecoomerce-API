@@ -330,7 +330,7 @@
     #product1 {
         text-align: center;
         background-color: #ebebeb;
-        background: url("img/CIENFUEGOS/InShot_20240203_200715839.gif");
+        background: url("img/InShot_20240618_165713390.gif");
     }
 
     #product1 .pro-container{
@@ -339,6 +339,7 @@
         padding-top: 20px;
         flex-wrap: wrap;
     }
+    
 
     #product1 .pro {
         width: 23%;
