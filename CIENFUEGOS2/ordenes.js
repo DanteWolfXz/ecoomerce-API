@@ -1,15 +1,3 @@
-// Obtener el elemento select
-var select = document.getElementById('statusSelect');
-
-// Escuchar el evento change en el select
-select.addEventListener('change', function() {
-    // Obtener el color de fondo del estado seleccionado
-    var color = select.options[select.selectedIndex].style.backgroundColor;
-    // Establecer el color de fondo del select
-    select.style.backgroundColor = color;
-});
-
-
 document.addEventListener('DOMContentLoaded', async () => {
     const accessToken = localStorage.getItem('accessToken');
 
@@ -38,7 +26,7 @@ async function obtenerOrdenes(accessToken) {
 
             if (orders.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="7">No hay órdenes disponibles</td>`;
+                row.innerHTML = `<td colspan="8">No hay órdenes disponibles</td>`;
                 ordersTableBody.appendChild(row);
             } else {
                 orders.forEach(order => {
@@ -51,18 +39,26 @@ async function obtenerOrdenes(accessToken) {
                         <td class="table_pickup_date"><input type="datetime-local" value="${order.pickupDate || ''}"></td>
                         <td class="table_status">
                             <select class="statusSelect" data-order-id="${order._id}">
-                                <option value="pendiente" ${order.status === 'pendiente' ? 'selected' : ''}>Pendiente</option>
-                                <option value="entregado" ${order.status === 'entregado' ? 'selected' : ''}>Entregado</option>
-                                <option value="cancelado" ${order.status === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+                                <option value="pendiente" ${order.status === 'pendiente' ? 'selected' : ''} style="background-color: #ffc107;">Pendiente</option>
+                                <option value="entregado" ${order.status === 'entregado' ? 'selected' : ''} style="background-color: #28a745;">Entregado</option>
+                                <option value="cancelado" ${order.status === 'cancelado' ? 'selected' : ''} style="background-color: #dc3545;">Cancelado</option>
                             </select>
                         </td>
                         <td class="table_total">$${order.totalAmount}</td>
+                        <td><button class="updateButton" data-order-id="${order._id}">Actualizar</button></td>
                     `;
                     ordersTableBody.appendChild(row);
                 });
 
                 document.querySelectorAll('.statusSelect').forEach(select => {
-                    select.addEventListener('change', actualizarEstadoOrden);
+                    select.addEventListener('change', function() {
+                        var color = select.options[select.selectedIndex].style.backgroundColor;
+                        select.style.backgroundColor = color;
+                    });
+                });
+
+                document.querySelectorAll('.updateButton').forEach(button => {
+                    button.addEventListener('click', actualizarEstadoOrden);
                 });
             }
         } else {
@@ -74,8 +70,9 @@ async function obtenerOrdenes(accessToken) {
 }
 
 async function actualizarEstadoOrden(event) {
-    const select = event.target;
-    const orderId = select.getAttribute('data-order-id');
+    const button = event.target;
+    const orderId = button.getAttribute('data-order-id');
+    const select = document.querySelector(`.statusSelect[data-order-id="${orderId}"]`);
     const newStatus = select.value;
     const accessToken = localStorage.getItem('accessToken');
 
@@ -98,3 +95,21 @@ async function actualizarEstadoOrden(event) {
         console.error('Error al actualizar la orden:', error);
     }
 }
+
+document.getElementById('searchInput').addEventListener('input', function(event) {
+    const searchTerm = event.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#ordersTableBody tr');
+
+    rows.forEach(row => {
+        const userCell = row.querySelector('.table_user');
+        const idCell = row.querySelector('.table_id');
+        const userName = userCell ? userCell.textContent.toLowerCase() : '';
+        const orderId = idCell ? idCell.textContent.toLowerCase() : '';
+
+        if (userName.includes(searchTerm) || orderId.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});

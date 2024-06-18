@@ -40,7 +40,7 @@
 
     <main class="table">
         <section class="table_header">
-            <h1>Ordenes de Clientes</h1>
+            <h1>Órdenes de Clientes</h1>
             <input type="text" id="searchInput" placeholder="Buscar...">
         </section>
         <section class="table_body">
@@ -50,36 +50,19 @@
                         <th>id</th>
                         <th>Cliente</th>
                         <th>Localidad</th>
-                        <th>Fecha de Creacion</th>
+                        <th>Fecha de Creación</th>
                         <th>Fecha de Retiro</th>
                         <th>Estado</th>
                         <th>Total</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="ordersTableBody">
-                    <tr>
-                        <td class="table_id">1</td>
-                        <td class="table_user"> <img src="https://static.vecteezy.com/system/resources/previews/005/005/837/original/user-icon-in-trendy-flat-style-isolated-on-grey-background-user-symbol-for-your-web-site-design-logo-app-ui-illustration-eps10-free-vector.jpg" alt="usuario"></td>
-                        <td class="table_localidad">San Miguel</td>
-                        <td class="table_date">11/7/2023</td>
-                        <td class="table_pickup_date"><input type="datetime-local"></td>
-                        <td class="table_status">
-                            <select class="statusSelect" id="statusSelect">
-                                <option value="pendiente" style="background-color: #ffc107;">Pendiente</option>
-                                <option value="entregado" style="background-color: #28a745;">Entregado</option>
-                                <option value="cancelado" style="background-color: #dc3545;">Cancelado</option>
-                            </select>
-                        </td>
-                        <td class="table_total">$45.500</td>
-                    </tr>
+                    <!-- Las filas se agregarán dinámicamente aquí -->
                 </tbody>
             </table>
         </section>
     </main>
-    
-    
-    
-    
     
 
 
