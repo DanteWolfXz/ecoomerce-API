@@ -1,14 +1,3 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const accessToken = localStorage.getItem('accessToken');
-
-    if (!accessToken) {
-        console.error('Token de acceso no encontrado en localStorage');
-        return;
-    }
-
-    await obtenerOrdenes(accessToken);
-});
-
 async function obtenerOrdenes(accessToken) {
     try {
         const ordersResponse = await fetch(`/api/orders`, {
