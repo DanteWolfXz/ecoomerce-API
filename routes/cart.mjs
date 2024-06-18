@@ -4,7 +4,7 @@ import Cart from "../models/Cart.mjs";
 
 const router = express.Router();
 
-// UPDATE CART
+// ACTUALIZAR CARRITO
 router.put("/:id", verifyToken, async (req, res) => {
     try {
         if (req.body.password) {
@@ -27,7 +27,7 @@ router.put("/:id", verifyToken, async (req, res) => {
 });
 
 
-// CREATE CART
+// CREAR CARRITO
 router.post("/", verifyToken, async (req, res) => {
     try {
         // Obtener el userId del token de acceso
@@ -59,7 +59,7 @@ router.post("/", verifyToken, async (req, res) => {
 
 
 
-// UPDATE CART
+// ACTUALIZAR CARRITO
 router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
     try {
         const updatedCart = await Cart.findByIdAndUpdate(
@@ -73,7 +73,7 @@ router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
     }
 });
 
-// ADD CART ITEM 
+// AGREGAR ITEM A CARRITO
 router.put("/:cartId/add", verifyToken, async (req, res) => {
     try {
         const { id, cantidad } = req.body;
@@ -101,7 +101,7 @@ router.put("/:cartId/add", verifyToken, async (req, res) => {
 });
 
 
-// DELETE CART
+// BORRAR CARRITO
 router.delete("/:id", verifyTokenAndAuthorization, async (req, res) => {
     try {
         await Cart.findByIdAndDelete(req.params.id);
@@ -111,7 +111,7 @@ router.delete("/:id", verifyTokenAndAuthorization, async (req, res) => {
     }
 });
 
-// GET USER CART
+// OBTENER CARRITO DE USUARIO
 router.get("/find/:id", verifyTokenAndAuthorization, async (req, res) => {
     try {
         const cart = await Cart.findOne({ userId: req.params.userid });
@@ -124,7 +124,7 @@ router.get("/find/:id", verifyTokenAndAuthorization, async (req, res) => {
     }
 });
 
-// GET ALL 
+// OBTENER TODOS LOS CARRITOS
 router.get("/", verifyTokenAndAdmin, async (req, res) => {
     try {
         const carts = await Cart.find();

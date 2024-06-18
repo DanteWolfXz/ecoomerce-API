@@ -5,7 +5,7 @@ import Order from "../models/Order.mjs";
 const router = express.Router();
 
 
-// UPDATE ORDER
+// ACTUALIZAR ORDEN
 router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
     try {
         const updatedOrder = await Order.findByIdAndUpdate(
@@ -19,7 +19,7 @@ router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// CREATE ORDER
+// CREAR ORDEN
 router.post("/", verifyToken, async (req, res) => {
     try {
         const newOrder = new Order(req.body);
@@ -30,7 +30,7 @@ router.post("/", verifyToken, async (req, res) => {
     }
 });
 
-// DELETE ORDER
+// BORRAR ORDEN
 router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
     try {
         await Order.findByIdAndDelete(req.params.id);
@@ -40,7 +40,7 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// GET USER ORDERS
+// OBTENER ORDENES DE USUARIO
 router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) => {
     try {
         const orders = await Order.find({ userId: req.params.userId });
@@ -53,7 +53,7 @@ router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) => {
     }
 });
 
-// GET ALL ORDERS
+// OBTENER TODAS LAS ORDENES
 router.get("/", verifyTokenAndAdmin, async (req, res) => {
     try {
         const orders = await Order.find();
@@ -63,7 +63,7 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// GET MONTHLY INCOME
+// OBTENER INGRESO MENSUAL
 router.get("/income", verifyTokenAndAdmin, async (req, res) => {
     const date = new Date();
     const lastMonth = new Date(date.setMonth(date.getMonth() - 1));

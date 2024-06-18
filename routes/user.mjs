@@ -4,7 +4,7 @@ import User from "../models/User.mjs"; // Asegúrate de especificar la extensió
 
 const router = express.Router();
 
-// UPDATE USER
+// ACTUALIZAR USUARIO
 router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
     try {
         if (req.body.password) {
@@ -26,7 +26,7 @@ router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
     }
 });
 
-// DELETE USER
+// BORRAR USUARIO
 router.delete("/:id", verifyTokenAndAuthorization, async (req, res) => {
     try {
         await User.findByIdAndDelete(req.params.id);
@@ -36,7 +36,7 @@ router.delete("/:id", verifyTokenAndAuthorization, async (req, res) => {
     }
 });
 
-// GET SINGLE USER
+// OBTENER USUARIO INDIVIDUAL
 router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -50,7 +50,7 @@ router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// GET ALL USERS
+// OBTENER TODOS LOS USUARIOS
 router.get("/", verifyTokenAndAdmin, async (req, res) => {
     const query = req.query.new;
     try {
@@ -63,7 +63,7 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// GET USER STATS
+// OBTENER ESTADISTICAS DE USUARIO
 router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
     const date = new Date();
     const lastYear = new Date(date.setFullYear(date.getFullYear() -1 ));
@@ -89,7 +89,7 @@ router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// GET USER PROFILE
+// OBTENER PERFIL DE USUARIO
 router.get("/profile/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.params.id;

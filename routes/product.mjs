@@ -4,7 +4,7 @@ import Product from "../models/Product.mjs"; // Asegúrate de especificar la ext
 
 const router = express.Router();
 
-// UPDATE PRODUCT
+// ACTUALIZAR PRODUCTO
 router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
     try {
         const updatedProduct = await Product.findByIdAndUpdate(
@@ -18,7 +18,7 @@ router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// CREATE PRODUCT
+// CREAR PRODUCTO
 router.post("/", verifyTokenAndAdmin, async (req, res) => {
     try {
         const newProduct = new Product(req.body);
@@ -29,7 +29,7 @@ router.post("/", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// DELETE PRODUCT
+// BORRAR PRODUCTO
 router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
     try {
         await Product.findByIdAndDelete(req.params.id);
@@ -39,7 +39,7 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
     }
 });
 
-// GET SINGLE PRODUCT
+// OBTENER UN PRODUCTO
 router.get("/find/:id", async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
@@ -53,7 +53,7 @@ router.get("/find/:id", async (req, res) => {
 });
 
 
-// GET ALL PRODUCTS
+// OBTENER TODOS LOS PRODUCTOS
 router.get("/", async (req, res) => {
     const qNew = req.query.new;
     const qCategory = req.query.category;
@@ -79,7 +79,7 @@ router.get("/", async (req, res) => {
 });
 
 
-// SEARCH PRODUCTS
+// BUSCAR PRODUCTOS
 router.get("/buscar", async (req, res) => {
     const criterioBusqueda = req.query.query.toLowerCase();
     const categoriaSeleccionada = req.query.category ? req.query.category.toLowerCase() : '';
@@ -103,7 +103,7 @@ router.get("/buscar", async (req, res) => {
     }
 });
 
-// ALL PRODUCTS (Busqueda)
+// BUSCAR PRODUCTOS (Busqueda)
 router.get("/", async (req, res) => {
     const qNew = req.query.new;
     const qCategory = req.query.category;
