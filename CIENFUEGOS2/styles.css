@@ -1476,8 +1476,8 @@ h1, h2 {
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 12px;
-    padding: 8px 16px;
+    border-radius: 15px;
+    padding: 10px 20px;
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s;

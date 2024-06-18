@@ -29,29 +29,57 @@ async function obtenerOrdenes(accessToken) {
                 row.innerHTML = `<td colspan="8">No hay órdenes disponibles</td>`;
                 ordersTableBody.appendChild(row);
             } else {
-                orders.forEach(order => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="table_id">${order._id}</td>
-                        <td class="table_user"><img src="https://static.vecteezy.com/system/resources/previews/005/005/837/original/user-icon-in-trendy-flat-style-isolated-on-grey-background-user-symbol-for-your-web-site-design-logo-app-ui-illustration-eps10-free-vector.jpg" alt="usuario"></td>
-                        <td class="table_localidad">${order.localidad || 'N/A'}</td>
-                        <td class="table_date">${new Date(order.createdAt).toLocaleDateString()}</td>
-                        <td class="table_pickup_date"><input type="datetime-local" value="${order.pickupDate || ''}"></td>
-                        <td class="table_status">
-                            <select class="statusSelect" data-order-id="${order._id}">
-                                <option value="pendiente" ${order.status === 'pendiente' ? 'selected' : ''} style="background-color: #ffc107;">Pendiente</option>
-                                <option value="entregado" ${order.status === 'entregado' ? 'selected' : ''} style="background-color: #28a745;">Entregado</option>
-                                <option value="cancelado" ${order.status === 'cancelado' ? 'selected' : ''} style="background-color: #dc3545;">Cancelado</option>
-                            </select>
-                        </td>
-                        <td class="table_total">$${order.totalAmount}</td>
-                        <td><button class="updateButton" data-order-id="${order._id}">Actualizar</button></td>
-                    `;
-                    ordersTableBody.appendChild(row);
-                });
+                for (const order of orders) {
+                    const userResponse = await fetch(`/api/users/find/${order.userid}`, {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    });
+
+                    if (userResponse.ok) {
+                        const user = await userResponse.json();
+                        const username = user.username.toUpperCase();
+
+                        const row = document.createElement('tr');
+                        const statusSelect = document.createElement('select');
+                        statusSelect.classList.add('statusSelect');
+                        statusSelect.setAttribute('data-order-id', order._id);
+
+                        const statuses = [
+                            { value: 'approved', text: 'Approved', color: '#ffc107' },
+                            { value: 'entregado', text: 'Entregado', color: '#28a745' },
+                            { value: 'cancelado', text: 'Cancelado', color: '#dc3545' }
+                        ];
+
+                        statuses.forEach(status => {
+                            const option = document.createElement('option');
+                            option.value = status.value;
+                            option.text = status.text;
+                            option.style.backgroundColor = status.color;
+                            if (order.status === status.value) {
+                                option.selected = true;
+                                statusSelect.style.backgroundColor = status.color;
+                            }
+                            statusSelect.appendChild(option);
+                        });
+
+                        row.innerHTML = `
+                            <td class="table_id">${order._id}</td>
+                            <td class="table_user"><strong>${username}</strong></td>
+                            <td class="table_localidad">${order.localidad || 'N/A'}</td>
+                            <td class="table_date">${new Date(order.createdAt).toLocaleDateString()}</td>
+                            <td class="table_pickup_date"><input type="datetime-local" value="${order.pickupDate || ''}"></td>
+                            <td class="table_status"></td>
+                            <td class="table_total">$${order.totalAmount}</td>
+                            <td><button class="updateButton" data-order-id="${order._id}">Actualizar</button></td>
+                        `;
+                        row.querySelector('.table_status').appendChild(statusSelect);
+                        ordersTableBody.appendChild(row);
+                    }
+                }
 
                 document.querySelectorAll('.statusSelect').forEach(select => {
-                    select.addEventListener('change', function() {
+                    select.addEventListener('change', function () {
                         var color = select.options[select.selectedIndex].style.backgroundColor;
                         select.style.backgroundColor = color;
                     });
@@ -96,7 +124,7 @@ async function actualizarEstadoOrden(event) {
     }
 }
 
-document.getElementById('searchInput').addEventListener('input', function(event) {
+document.getElementById('searchInput').addEventListener('input', function (event) {
     const searchTerm = event.target.value.toLowerCase();
     const rows = document.querySelectorAll('#ordersTableBody tr');
 
