@@ -22,11 +22,14 @@ function cargarProductosDesdeServidor() {
         });
 }
 
-function mostrarProductos(productos) {
+function mostrarProductos(productos, pagina) {
     const contenedor = document.getElementById('pro-container');
     contenedor.innerHTML = '';
+    const inicio = (pagina - 1) * productosPorPagina;
+    const fin = inicio + productosPorPagina;
+    const productosPagina = productos.slice(inicio, fin);
 
-    productos.forEach(producto => {
+    productosPagina.forEach(producto => {
         const nuevoProducto = document.createElement('div');
         nuevoProducto.classList.add('pro');
 
@@ -51,22 +54,7 @@ function mostrarProductos(productos) {
         contenedor.appendChild(nuevoProducto);
     });
 
-    // Agregar event listener a los botones "Añadir al carrito" después de que se hayan generado
-    const addToCartButtons = document.querySelectorAll('.add-to-cart');
-
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const id = button.getAttribute('data-id');
-            const nombre = button.getAttribute('data-nombre');
-            const precio = button.getAttribute('data-precio');
-            const imagen = button.getAttribute('data-imagen');
-            agregarAlCarrito(id, nombre, precio, imagen);
-            button.classList.add('clicked');
-            setTimeout(() => {
-                button.classList.remove('clicked');
-            }, 3000);
-        });
-    });
+    agregarEventListenersCarrito();
 }
 
 function crearPaginacion(totalProductos) {
@@ -77,24 +65,15 @@ function crearPaginacion(totalProductos) {
     for (let i = 1; i <= totalPaginas; i++) {
         const boton = document.createElement('button');
         boton.innerText = i;
-        boton.addEventListener('click', () => cambiarPagina(i, boton));
-        if (i === paginaActual) {
-            boton.classList.add('selected');
-        }
+        boton.addEventListener('click', () => cambiarPagina(i));
         paginacionContainer.appendChild(boton);
     }
 }
 
-function cambiarPagina(pagina, boton) {
+function cambiarPagina(pagina) {
     paginaActual = pagina;
     mostrarProductos(productosTotales, pagina);
-
-    const botones = document.querySelectorAll('#pagination button');
-    botones.forEach(b => b.classList.remove('selected'));
-
-    boton.classList.add('selected');
 }
-
 
 function buscarProductos() {
     const criterioBusqueda = document.getElementById('search-input').value.toLowerCase();
@@ -109,26 +88,14 @@ function buscarProductos() {
             }
         })
         .then(productos => {
-            mostrarProductos(productos);
+            productosTotales = productos;
+            mostrarProductos(productos, 1);
+            crearPaginacion(productos.length);
         })
         .catch(error => {
             console.error('Error:', error);
         });
 }
-
-document.getElementById('search-input').addEventListener('keyup', function(event) {
-    if (event.key === 'Enter') {
-        buscarProductos();
-    }
-});
-
-document.getElementById('buscar-button').addEventListener('click', function() {
-    buscarProductos();
-});
-
-document.getElementById('category-filter').addEventListener('change', function() {
-    buscarProductos();
-});
 
 function agregarEventListenersCarrito() {
     const addToCartButtons = document.querySelectorAll('.add-to-cart');
@@ -164,5 +131,3 @@ document.getElementById('category-filter').addEventListener('change', function()
 window.onload = () => {
     cargarProductosDesdeServidor();
 };
-
-
