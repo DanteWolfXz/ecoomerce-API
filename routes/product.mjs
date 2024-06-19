@@ -105,22 +105,41 @@ router.get("/buscar", async (req, res) => {
 
 // BUSCAR PRODUCTOS (Busqueda)
 router.get("/buscar", async (req, res) => {
-    const criterioBusqueda = req.query.query || "";
-    const qCategory = req.query.category || "";
+    const criterioBusqueda = req.query.query;
+    const categoriaSeleccionada = req.query.category;
 
     try {
-        let products = await Product.find({
-            $and: [
-                { name: new RegExp(criterioBusqueda, 'i') },
-                { categorias: { $in: [qCategory] } }
-            ]
-        });
+        let products;
+
+        if (criterioBusqueda && categoriaSeleccionada) {
+            // Búsqueda por nombre y categoría
+            products = await Product.find({
+                $and: [
+                    { nombre: { $regex: criterioBusqueda, $options: 'i' } },
+                    { categoria: { $regex: categoriaSeleccionada, $options: 'i' } }
+                ]
+            });
+        } else if (criterioBusqueda) {
+            // Búsqueda solo por nombre
+            products = await Product.find({
+                nombre: { $regex: criterioBusqueda, $options: 'i' }
+            });
+        } else if (categoriaSeleccionada) {
+            // Búsqueda solo por categoría
+            products = await Product.find({
+                categoria: { $regex: categoriaSeleccionada, $options: 'i' }
+            });
+        } else {
+            // Si no hay criterios de búsqueda, devolver todos los productos
+            products = await Product.find();
+        }
 
         res.status(200).json(products);
     } catch (err) {
         res.status(500).json(err);
     }
 });
+
 
 
 export default router;
