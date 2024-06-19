@@ -104,33 +104,23 @@ router.get("/buscar", async (req, res) => {
 });
 
 // BUSCAR PRODUCTOS (Busqueda)
-router.get("/", async (req, res) => {
-    const qNew = req.query.new;
-    const qCategory = req.query.category;
-    const criterioBusqueda = req.query.query;
+router.get("/buscar", async (req, res) => {
+    const criterioBusqueda = req.query.query || "";
+    const qCategory = req.query.category || "";
 
     try {
-        let products;
-
-        if (criterioBusqueda) {
-            // Si se proporciona un término de búsqueda, redirigir la solicitud a la ruta de búsqueda
-            return res.redirect(`/api/products/buscar?query=${criterioBusqueda}`);
-        }
-
-        if (qNew) {
-            products = await Product.find().sort({ createdAt: -1 }).limit(1);
-        } else if (qCategory) {
-            products = await Product.find({ categorias: { $in: [qCategory] } });
-        } else {
-            products = await Product.find();
-        }
+        let products = await Product.find({
+            $and: [
+                { name: new RegExp(criterioBusqueda, 'i') },
+                { categorias: { $in: [qCategory] } }
+            ]
+        });
 
         res.status(200).json(products);
     } catch (err) {
         res.status(500).json(err);
     }
 });
-
 
 
 export default router;

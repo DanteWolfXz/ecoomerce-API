@@ -64,6 +64,7 @@ function mostrarProductos(productos) {
     });
 }
 
+
 function buscarProductos() {
     const criterioBusqueda = document.getElementById('search-input').value.toLowerCase();
     const categoriaSeleccionada = document.getElementById('category-filter').value.toLowerCase();
@@ -84,6 +85,22 @@ function buscarProductos() {
         });
 }
 
+function mostrarProductos(productos) {
+    const productosContainer = document.getElementById('productos-container');
+    productosContainer.innerHTML = ''; // Limpiar productos anteriores
+
+    productos.forEach(producto => {
+        const productoElement = document.createElement('div');
+        productoElement.classList.add('producto');
+        productoElement.innerHTML = `
+            <h3>${producto.name}</h3>
+            <p>Categoría: ${producto.categorias.join(', ')}</p>
+            <p>Precio: $${producto.price}</p>
+        `;
+        productosContainer.appendChild(productoElement);
+    });
+}
+
 document.getElementById('search-input').addEventListener('keyup', function(event) {
     if (event.key === 'Enter') {
         buscarProductos();
@@ -91,6 +108,10 @@ document.getElementById('search-input').addEventListener('keyup', function(event
 });
 
 document.getElementById('buscar-button').addEventListener('click', function() {
+    buscarProductos();
+});
+
+document.getElementById('category-filter').addEventListener('change', function() {
     buscarProductos();
 });
 
