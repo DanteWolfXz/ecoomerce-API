@@ -1,4 +1,7 @@
 const endpointURL = 'https://ecoomerce-api-v7wq.onrender.com/api/products';
+const productosPorPagina = 8;
+let productosTotales = [];
+let paginaActual = 1;
 
 function cargarProductosDesdeServidor() {
     fetch(endpointURL)
@@ -10,18 +13,27 @@ function cargarProductosDesdeServidor() {
             }
         })
         .then(productos => {
-            mostrarProductos(productos);
+            productosTotales = productos;
+            mostrarProductos(productos, paginaActual);
+            crearPaginacion(productos.length);
         })
         .catch(error => {
             console.error('Error:', error);
         });
 }
 
-function mostrarProductos(productos) {
+function mostrarProductos(productos, pagina) {
     const contenedor = document.getElementById('pro-container');
+    if (!contenedor) {
+        console.error('El contenedor de productos no se encontró.');
+        return;
+    }
     contenedor.innerHTML = '';
+    const inicio = (pagina - 1) * productosPorPagina;
+    const fin = inicio + productosPorPagina;
+    const productosPagina = productos.slice(inicio, fin);
 
-    productos.forEach(producto => {
+    productosPagina.forEach(producto => {
         const nuevoProducto = document.createElement('div');
         nuevoProducto.classList.add('pro');
 
@@ -46,24 +58,26 @@ function mostrarProductos(productos) {
         contenedor.appendChild(nuevoProducto);
     });
 
-    // Agregar event listener a los botones "Añadir al carrito" después de que se hayan generado
-    const addToCartButtons = document.querySelectorAll('.add-to-cart');
-
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const id = button.getAttribute('data-id');
-            const nombre = button.getAttribute('data-nombre');
-            const precio = button.getAttribute('data-precio');
-            const imagen = button.getAttribute('data-imagen');
-            agregarAlCarrito(id, nombre, precio, imagen);
-            button.classList.add('clicked');
-            setTimeout(() => {
-                button.classList.remove('clicked');
-            }, 3000);
-        });
-    });
+    agregarEventListenersCarrito();
 }
 
+function crearPaginacion(totalProductos) {
+    const totalPaginas = Math.ceil(totalProductos / productosPorPagina);
+    const paginacionContainer = document.getElementById('pagination');
+    paginacionContainer.innerHTML = '';
+
+    for (let i = 1; i <= totalPaginas; i++) {
+        const boton = document.createElement('button');
+        boton.innerText = i;
+        boton.addEventListener('click', () => cambiarPagina(i));
+        paginacionContainer.appendChild(boton);
+    }
+}
+
+function cambiarPagina(pagina) {
+    paginaActual = pagina;
+    mostrarProductos(productosTotales, pagina);
+}
 
 function buscarProductos() {
     const criterioBusqueda = document.getElementById('search-input').value.toLowerCase();
@@ -78,26 +92,29 @@ function buscarProductos() {
             }
         })
         .then(productos => {
-            mostrarProductos(productos); // Mostrar los productos encontrados
+            productosTotales = productos;
+            mostrarProductos(productos, 1);
+            crearPaginacion(productos.length);
         })
         .catch(error => {
             console.error('Error:', error);
         });
 }
 
-function mostrarProductos(productos) {
-    const productosContainer = document.getElementById('productos-container');
-    productosContainer.innerHTML = ''; // Limpiar productos anteriores
-
-    productos.forEach(producto => {
-        const productoElement = document.createElement('div');
-        productoElement.classList.add('producto');
-        productoElement.innerHTML = `
-            <h3>${producto.name}</h3>
-            <p>Categoría: ${producto.categorias.join(', ')}</p>
-            <p>Precio: $${producto.price}</p>
-        `;
-        productosContainer.appendChild(productoElement);
+function agregarEventListenersCarrito() {
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const id = button.getAttribute('data-id');
+            const nombre = button.getAttribute('data-nombre');
+            const precio = button.getAttribute('data-precio');
+            const imagen = button.getAttribute('data-imagen');
+            agregarAlCarrito(id, nombre, precio, imagen);
+            button.classList.add('clicked');
+            setTimeout(() => {
+                button.classList.remove('clicked');
+            }, 3000);
+        });
     });
 }
 
