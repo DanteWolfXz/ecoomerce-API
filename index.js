@@ -52,7 +52,7 @@ app.use('/api/auth', verifyAuthRoute);
 const staticDir = join(__dirname, 'CIENFUEGOS2');
 app.use(express.static(staticDir));
 
-const views = ['index', 'shop', 'cart', 'about', 'registro', 'Acceder', 'Mi-Cuenta', 'pago-denegado', 'pago-confirmado', 'pago-pendiente', 'Ordenes'];
+const views = ['index', 'shop', 'cart', 'about', 'registro', 'Acceder', 'Mi-Cuenta', 'pago-denegado', 'pago-confirmado', 'pago-pendiente', 'Ordenes', 'sproduct'];
 
 views.forEach(view => {
   app.get(`/${view === 'index' ? '' : view}`, (req, res) => {
