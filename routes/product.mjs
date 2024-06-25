@@ -87,13 +87,27 @@ router.get("/buscar", async (req, res) => {
     try {
         let productos;
 
-        // Realizar la consulta para buscar productos según el término de búsqueda y la categoría seleccionada
+        // Realizar la consulta para buscar productos según el término de búsqueda, categoría seleccionada y ID
         if (categoriaSeleccionada === '' || categoriaSeleccionada === 'todas las categorías') {
-            productos = await Product.find({ nombre: { $regex: criterioBusqueda, $options: 'i' } });
+            productos = await Product.find({ 
+                $or: [
+                    { nombre: { $regex: criterioBusqueda, $options: 'i' } },
+                    { categoria: { $regex: criterioBusqueda, $options: 'i' } },
+                    { id: parseInt(criterioBusqueda) }
+                ]
+            });
         } else {
             productos = await Product.find({ 
-                nombre: { $regex: criterioBusqueda, $options: 'i' },
-                categorias: { $in: [categoriaSeleccionada] }
+                $and: [
+                    { 
+                        $or: [
+                            { nombre: { $regex: criterioBusqueda, $options: 'i' } },
+                            { categoria: { $regex: criterioBusqueda, $options: 'i' } },
+                            { id: parseInt(criterioBusqueda) }
+                        ]
+                    },
+                    { categoria: categoriaSeleccionada }
+                ]
             });
         }
 
@@ -102,6 +116,7 @@ router.get("/buscar", async (req, res) => {
         res.status(500).json({ message: 'Error al buscar productos', error: error.message });
     }
 });
+
 
 
 
