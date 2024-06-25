@@ -77,7 +77,7 @@ function cambiarPagina(pagina) {
 
 function buscarProductos() {
     const criterioBusqueda = document.getElementById('search-input').value.toLowerCase();
-    const categoriaSeleccionada = ''; // Vacío porque no hay filtro de categoría en el HTML actual
+    const categoriaSeleccionada = document.getElementById('category-filter').value.toLowerCase();
 
     fetch(`${endpointURL}/buscar?query=${criterioBusqueda}&category=${categoriaSeleccionada}`)
         .then(response => {
@@ -121,6 +121,10 @@ document.getElementById('search-input').addEventListener('keyup', function(event
 });
 
 document.getElementById('buscar-button').addEventListener('click', function() {
+    buscarProductos();
+});
+
+document.getElementById('category-filter').addEventListener('change', function() {
     buscarProductos();
 });
 

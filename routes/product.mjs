@@ -81,37 +81,19 @@ router.get("/", async (req, res) => {
 
 // BUSCAR PRODUCTOS
 router.get("/buscar", async (req, res) => {
-    const criterioBusqueda = req.query.query ? req.query.query.toLowerCase() : '';
+    const criterioBusqueda = req.query.query.toLowerCase();
     const categoriaSeleccionada = req.query.category ? req.query.category.toLowerCase() : '';
 
     try {
         let productos;
 
-        // Comprobar si el criterio de búsqueda es un número válido
-        const idBusqueda = parseInt(criterioBusqueda);
-        const esNumeroValido = !isNaN(idBusqueda);
-
-        // Realizar la consulta para buscar productos según el término de búsqueda, categoría seleccionada e ID
+        // Realizar la consulta para buscar productos según el término de búsqueda y la categoría seleccionada
         if (categoriaSeleccionada === '' || categoriaSeleccionada === 'todas las categorías') {
-            productos = await Product.find({ 
-                $or: [
-                    { nombre: { $regex: criterioBusqueda, $options: 'i' } },
-                    { categoria: { $regex: criterioBusqueda, $options: 'i' } },
-                    esNumeroValido ? { id: idBusqueda } : {}
-                ]
-            });
+            productos = await Product.find({ nombre: { $regex: criterioBusqueda, $options: 'i' } });
         } else {
             productos = await Product.find({ 
-                $and: [
-                    { 
-                        $or: [
-                            { nombre: { $regex: criterioBusqueda, $options: 'i' } },
-                            { categoria: { $regex: criterioBusqueda, $options: 'i' } },
-                            esNumeroValido ? { id: idBusqueda } : {}
-                        ]
-                    },
-                    { categoria: categoriaSeleccionada }
-                ]
+                nombre: { $regex: criterioBusqueda, $options: 'i' },
+                categorias: { $in: [categoriaSeleccionada] }
             });
         }
 
@@ -120,7 +102,6 @@ router.get("/buscar", async (req, res) => {
         res.status(500).json({ message: 'Error al buscar productos', error: error.message });
     }
 });
-
 
 
 export default router;
