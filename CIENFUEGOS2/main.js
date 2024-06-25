@@ -1,4 +1,4 @@
-const endpointURL = 'https://ecoomerce-api-v7wq.onrender.com/api/products';
+const endpointURL = 'https://ecoomerce-api-v7wq.onrender.com/api/product';
 const productosPorPagina = 8;
 let productosTotales = [];
 let paginaActual = 1;
