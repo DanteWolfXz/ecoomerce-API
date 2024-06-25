@@ -103,24 +103,7 @@ router.get("/buscar", async (req, res) => {
     }
 });
 
-// BUSCAR PRODUCTOS (Busqueda)
-router.get("/buscar", async (req, res) => {
-    const criterioBusqueda = req.query.query || "";
-    const qCategory = req.query.category || "";
 
-    try {
-        let products = await Product.find({
-            $and: [
-                { name: new RegExp(criterioBusqueda, 'i') },
-                { categorias: { $in: [qCategory] } }
-            ]
-        });
-
-        res.status(200).json(products);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-});
 
 
 export default router;
