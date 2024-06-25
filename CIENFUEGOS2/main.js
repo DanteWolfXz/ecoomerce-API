@@ -1,4 +1,4 @@
-const endpointURL = 'https://ecoomerce-api-v7wq.onrender.com/api/product';
+const endpointURL = 'https://ecoomerce-api-v7wq.onrender.com/api/products';
 const productosPorPagina = 8;
 let productosTotales = [];
 let paginaActual = 1;
@@ -77,7 +77,7 @@ function cambiarPagina(pagina) {
 
 function buscarProductos() {
     const criterioBusqueda = document.getElementById('search-input').value.toLowerCase();
-    const categoriaSeleccionada = document.getElementById('category-filter').value.toLowerCase();
+    const categoriaSeleccionada = ''; // Vacío porque no hay filtro de categoría en el HTML actual
 
     fetch(`${endpointURL}/buscar?query=${criterioBusqueda}&category=${categoriaSeleccionada}`)
         .then(response => {
@@ -121,10 +121,6 @@ document.getElementById('search-input').addEventListener('keyup', function(event
 });
 
 document.getElementById('buscar-button').addEventListener('click', function() {
-    buscarProductos();
-});
-
-document.getElementById('category-filter').addEventListener('change', function() {
     buscarProductos();
 });
 

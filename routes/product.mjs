@@ -123,7 +123,4 @@ router.get("/buscar", async (req, res) => {
 
 
 
-
-
-
 export default router;

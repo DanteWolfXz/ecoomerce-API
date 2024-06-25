@@ -14,7 +14,6 @@ import { MercadoPagoConfig, Preference } from 'mercadopago';
 import debug from 'debug';
 import bodyParser from 'body-parser';
 import fetch from 'node-fetch';
-import { obtenerUserIdDesdeToken } from './routes/verifyToken.mjs';
 
 dotenv.config();
 
