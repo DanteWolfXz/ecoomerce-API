@@ -70,7 +70,6 @@ function crearPaginacion(totalProductos) {
     }
 }
 
-
 function cambiarPagina(pagina) {
     paginaActual = pagina;
     mostrarProductos(productosTotales, pagina);
@@ -97,7 +96,6 @@ function buscarProductos() {
             console.error('Error:', error);
         });
 }
-
 
 function agregarEventListenersCarrito() {
     const addToCartButtons = document.querySelectorAll('.add-to-cart');
