@@ -3,17 +3,19 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import cors from 'cors';
+import { MercadoPagoConfig, Preference } from 'mercadopago';
+import debug from 'debug';
+import bodyParser from 'body-parser';
+import fetch from 'node-fetch';
+import sequelize from './dbConfig.js';
 import userRoute from './routes/user.mjs';
 import authRoute from './routes/auth.mjs';
 import productRoute from './routes/product.mjs';
 import cartRoute from './routes/cart.mjs';
 import orderRoute from './routes/order.mjs';
 import verifyAuthRoute from './routes/verifyAuth.mjs';
-import cors from 'cors';
-import { MercadoPagoConfig, Preference } from 'mercadopago';
-import debug from 'debug';
-import bodyParser from 'body-parser';
-import fetch from 'node-fetch';
+import mysqlproductRoute from './routes/sqlroute.mjs';
 
 dotenv.config();
 
@@ -26,11 +28,25 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+// Configuración de la conexión a MongoDB
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => console.log('DBConnection Successfull!'))
   .catch((err) => {
     console.log(err);
+  });
+
+// Configuración de la conexión a MySQL
+sequelize.authenticate()
+  .then(() => console.log('MySQL Connection Successfull!'))
+  .catch((err) => {
+    console.log('Error connecting to MySQL:', err);
+  });
+
+sequelize.sync() // Sincroniza todos los modelos con la base de datos
+  .then(() => console.log('Models synchronized with MySQL database.'))
+  .catch((err) => {
+    console.log('Error synchronizing models:', err);
   });
 
 const app = express();
@@ -41,12 +57,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', join(__dirname, 'CIENFUEGOS2'));
 app.set('view engine', 'ejs');
 
+// Definición de rutas
 app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
-app.use('/api/products', productRoute);
+app.use('/api/products', productRoute); // Aquí puedes seguir usando MongoDB para estos productos
 app.use('/api/carts', cartRoute);
 app.use('/api/orders', orderRoute);
 app.use('/api/auth', verifyAuthRoute);
+app.use('/api/mysqlproducts', mysqlproductRoute);
 
 const staticDir = join(__dirname, 'CIENFUEGOS2');
 app.use(express.static(staticDir));
@@ -292,7 +310,6 @@ app.post('/webhook', async (req, res) => {
         res.sendStatus(500);
     }
 });
-
 
 app.listen(port, () => {
   console.log(`Backend server is running on port ${port}!`);
