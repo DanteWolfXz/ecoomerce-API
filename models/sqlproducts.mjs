@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database'; // Configura tu conexión a la base de datos MySQL
+import sequelize from '../config/database.mjs'; // Configura tu conexión a la base de datos MySQL
 
 const Product = sequelize.define('Product', {
     id: {
