@@ -25,6 +25,12 @@ function cargarProductosDesdeServidor() {
 function mostrarProductos(productos, pagina) {
     const contenedor = document.getElementById('pro-container');
     contenedor.innerHTML = '';
+
+    if (productos.length === 0) {
+        contenedor.innerHTML = '<p>No se encontraron productos.</p>';
+        return;
+    }
+
     const inicio = (pagina - 1) * productosPorPagina;
     const fin = inicio + productosPorPagina;
     const productosPagina = productos.slice(inicio, fin);
@@ -79,7 +85,20 @@ function buscarProductos() {
     const criterioBusqueda = document.getElementById('search-input').value.toLowerCase();
     const categoriaSeleccionada = document.getElementById('category-filter').value.toLowerCase();
 
-    fetch(`${endpointURL}/buscar?query=${criterioBusqueda}&category=${categoriaSeleccionada}`)
+    // Construye la URL con los parámetros de búsqueda
+    let url = `${endpointURL}/buscar?`;
+    if (criterioBusqueda) {
+        url += `query=${encodeURIComponent(criterioBusqueda)}&`;
+    }
+    if (categoriaSeleccionada) {
+        url += `category=${encodeURIComponent(categoriaSeleccionada)}`;
+    }
+    // Elimina el último '&' si existe
+    if (url.endsWith('&')) {
+        url = url.slice(0, -1);
+    }
+
+    fetch(url)
         .then(response => {
             if (response.ok) {
                 return response.json();

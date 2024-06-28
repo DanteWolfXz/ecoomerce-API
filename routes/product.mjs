@@ -81,27 +81,32 @@ router.get("/", async (req, res) => {
 
 // BUSCAR PRODUCTOS
 router.get("/buscar", async (req, res) => {
-    const criterioBusqueda = req.query.query.toLowerCase();
+    const criterioBusqueda = req.query.query ? req.query.query.toLowerCase() : '';
     const categoriaSeleccionada = req.query.category ? req.query.category.toLowerCase() : '';
 
     try {
-        let productos;
+        // Crear un objeto de búsqueda
+        let searchQuery = {};
 
-        // Realizar la consulta para buscar productos según el término de búsqueda y la categoría seleccionada
-        if (categoriaSeleccionada === '' || categoriaSeleccionada === 'todas las categorías') {
-            productos = await Product.find({ nombre: { $regex: criterioBusqueda, $options: 'i' } });
-        } else {
-            productos = await Product.find({ 
-                nombre: { $regex: criterioBusqueda, $options: 'i' },
-                categorias: { $in: [categoriaSeleccionada] }
-            });
+        // Agregar el criterio de búsqueda por nombre si está presente
+        if (criterioBusqueda) {
+            searchQuery.nombre = { $regex: criterioBusqueda, $options: 'i' }; // Búsqueda insensible a mayúsculas/minúsculas
         }
+
+        // Agregar el criterio de búsqueda por categoría si está presente
+        if (categoriaSeleccionada && categoriaSeleccionada !== 'todas las categorías') {
+            searchQuery.categoria = { $regex: categoriaSeleccionada, $options: 'i' }; // Búsqueda insensible a mayúsculas/minúsculas
+        }
+
+        // Realizar la consulta con el objeto de búsqueda
+        const productos = await Product.find(searchQuery);
 
         res.status(200).json(productos);
     } catch (error) {
         res.status(500).json({ message: 'Error al buscar productos', error: error.message });
     }
 });
+
 
 
 export default router;

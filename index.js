@@ -16,6 +16,7 @@ import cartRoute from './routes/cart.mjs';
 import orderRoute from './routes/order.mjs';
 import verifyAuthRoute from './routes/verifyAuth.mjs';
 import mysqlproductRoute from './routes/sqlroute.mjs';
+import mysql from 'mysql2';
 
 dotenv.config();
 
