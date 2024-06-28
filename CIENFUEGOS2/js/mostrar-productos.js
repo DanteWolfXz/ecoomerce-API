@@ -12,7 +12,6 @@ function cargarProductosDesdeServidor() {
         .then(productos => {
             mostrarProductos(productos, 'recomendado', 'recomendados-container');
             mostrarProductos(productos, 'cotillon', 'cotillon-container');
-            // Agregar event listeners a los botones "Añadir al carrito" después de que se hayan generado
             agregarEventListenersCarrito();
         })
         .catch(error => {
@@ -24,7 +23,14 @@ function mostrarProductos(productos, categoria, containerId) {
     const contenedor = document.getElementById(containerId);
     contenedor.innerHTML = '';
 
-    productos.filter(producto => producto.categoria === categoria).forEach(producto => {
+    const productosFiltrados = productos.filter(producto => producto.categoria.toLowerCase() === categoria.toLowerCase());
+
+    if (productosFiltrados.length === 0) {
+        contenedor.innerHTML = '<p>No se encontraron productos.</p>';
+        return;
+    }
+
+    productosFiltrados.forEach(producto => {
         const nuevoProducto = document.createElement('div');
         nuevoProducto.classList.add('pro');
 
@@ -73,25 +79,20 @@ function agregarAlCarrito(productoId, nombre, precio, imagen) {
     const userId = localStorage.getItem('userId');
 
     if (!accessToken || !userId) {
-        // Si el usuario no está autenticado, muestra un popup y detiene la ejecución
         alert('Debe iniciar sesión para agregar productos al carrito.');
         return;
     }
 
     let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
     
-    // Verificar si el producto ya está en el carrito
     const productoEnCarrito = carrito.find(p => p.id === productoId);
 
     if (productoEnCarrito) {
-        // Si el producto ya está en el carrito, incrementar la cantidad
         productoEnCarrito.cantidad++;
     } else {
-        // Si el producto no está en el carrito, agregarlo con cantidad 1
         carrito.push({ id: productoId, nombre: nombre, precio: precio, imagen: imagen, cantidad: 1 });
     }
 
-    // Actualizar localStorage con el nuevo carrito
     localStorage.setItem('carrito', JSON.stringify(carrito));
 }
 
