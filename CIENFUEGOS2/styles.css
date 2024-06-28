@@ -1133,8 +1133,22 @@
         #newlatter .form {
             width: 70%;
         }
-    
+
+        /* buscador */
+        #search-input {
+            width: 50%;
+        }
+        #category-filter {
+            height: 2.525rem;
+            margin-left: 5px;
+            padding: 6px;
+        }
+        #buscar-button {
+            width: 15%;
+        }
     }
+
+    
 
     /* Cart Page */ 
     #cart {
@@ -1290,6 +1304,30 @@
 
         footer .copyright {
             text-align: start;
+        }
+        /* buscador */
+
+        #buscador {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        #search-input {
+            width: 90%;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+        #category-filter {
+            width: 90%;
+            margin: 5px 0;
+            height: 2.525rem;
+            padding: 6px;
+        }
+        #buscar-button {
+            width: 90%;
+            height: 3rem;
+            padding: 8px;
+            font-size: 14px;
+            margin-top: 5px;
         }
 
     }
