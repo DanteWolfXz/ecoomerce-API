@@ -1279,7 +1279,6 @@
             padding: 0 20px;
             background-position: 55%;
         }
-
         #product1 .pro {
             width: 100%;
         }
@@ -1301,12 +1300,11 @@
         #newslatter .form {
             width: 100%;
         }
-
         footer .copyright {
             text-align: start;
         }
+    
         /* buscador */
-
         #buscador {
             flex-direction: column;
             align-items: stretch;
@@ -1323,13 +1321,12 @@
             padding: 6px;
         }
         #buscar-button {
-            width: 90%;
-            height: 3rem;
-            padding: 8px;
+            width: 90% !important;
+            height: 3rem !important;
+            padding: 8px !important;
             font-size: 14px;
             margin-top: 5px;
         }
-
     }
 
     /* Single Product */
